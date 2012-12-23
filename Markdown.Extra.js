@@ -13,6 +13,30 @@
     conv = converter;
   };
 
+  /* These  variables that can be set by options */
+
+  // fenced code block options
+  var _googleCodePrettify = false;
+  var _highlightJs = false;
+
+  // table options
+  var _tableClass = 'wmd-table';
+
+  Markdown.Extra.setup = function(options) {
+    if (typeof options.fencedCodeBlocks != "undefined") {
+      var fc = options.fencedCodeBlocks;
+      if (typeof fc.highlighter != "undefined") {
+        _googleCodePrettify = fc.highlighter === 'prettify';
+        _highlightJs = fc.highlighter === 'highlight';
+      }
+    }
+    if (typeof options.tables != "undefined") {
+      var tb = options.tables;
+      if (typeof tb.tableClass != "undefined")
+        _tableClass = tb.tableClass;
+    }
+  };
+
   function strip(str) {
     return str.replace(/^\s+|\s+$/g, '');
   }
@@ -131,7 +155,8 @@
         }
 
         // build html
-        var tableHtml = '<table class="wmd-table">' + buildRow(block[0], border, align, true);
+        var cls = _tableClass === '' ? '' : ' class="'+_tableClass+'"';
+        var tableHtml = '<table'+cls+'>' + buildRow(block[0], border, align, true);
         for (j = 2; j < block.length; j++)
           tableHtml += buildRow(block[j], border, align, false);
         tableHtml += "</table>\n";
@@ -144,6 +169,37 @@
 
     return makeTables();
   }; // Markdown.Extra.tables
+
+  // gfm-inspired fenced code blocks
+  Markdown.Extra.fencedCodeBlocks = function(text) {
+    var re = new RegExp(
+        '(\\n\\n|^\\n?)' +         // separator, $1 = leading whitespace
+        '^```(\\w+)?\\s*\\n' +     // opening fence, $2 = optional lang
+        '([\\s\\S]*?)' +           // $3 = code block content (no dotAll in js - dot doesn't match newline)
+        '^```\\s*\\n',             // closing fence
+        'gm');                     // Flags : global, multiline
+
+    var match, output, first, last,
+        codeClass, codeTagStart, preTagStart;
+    while (match = re.exec(text)) {
+      // we give it a class if none is specified by the user's choice of highlighter
+      codeClass = match[2] === '' ? 'wmd-code-block' : 'language-'+match[2];
+      preTagStart = _googleCodePrettify ? '<pre class="prettyprint">' : '<pre>';
+      codeTagStart = '<code class="'+codeClass+'">';
+
+      // wrap code block content
+      output = match[1] + preTagStart + codeTagStart;
+      output += match[3];
+      output += '</code></pre>';
+
+      // substitute wrapped content for fenced code block
+      first = text.substring(0, match.index);
+      last = text.substr(match.index + match[0].length);
+      text = first + output + last;
+    }
+
+    return text;
+  };
 
 })();
 

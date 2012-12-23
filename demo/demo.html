@@ -6,14 +6,15 @@
         <title>PageDown Demo Page</title>
         
         <link rel="stylesheet" type="text/css" href="demo.css" />
+        <link href="prettify.css" type="text/css" rel="stylesheet" />
         
         <script type="text/javascript" src="../pagedown/Markdown.Converter.js"></script>
         <script type="text/javascript" src="../pagedown/Markdown.Sanitizer.js"></script>
         <script type="text/javascript" src="../pagedown/Markdown.Editor.js"></script>
-        <script type="text/javascript" src="../Markdown.Extra.js"></script>
+        <script type="text/javascript" src="prettify.js"></script>       <script type="text/javascript" src="../Markdown.Extra.js"></script>
     </head>
     
-    <body>
+    <body onload="prettyPrint()">
         <div class="wmd-panel">
             <div id="wmd-button-bar"></div>
             <textarea class="wmd-input" id="wmd-input">
@@ -21,6 +22,8 @@ This is the *first* editor.
 ------------------------------
 
 Just plain **Markdown**, except that the input is sanitized:
+
+<marquee>I'm the ghost from the past!</marquee>
 
 # Markdown Extra
 
@@ -35,8 +38,20 @@ out all of the table-related tags. Check out the second editor though.
 | Phone     |   $12 |
 | Pipe      |    $1 |
 
+## Fenced Code Blocks
 
-<marquee>I'm the ghost from the past!</marquee>
+```javascript
+var foo = "bar";
+```
+
+You can also specify options. This editor was given the following options:
+
+```javascript
+Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
+```
+
+The wrap tag and class don't work here though, again due to the sanitizing converter.
+
 </textarea>
         </div>
         <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
@@ -71,16 +86,36 @@ Take a look at the source and you'll see that the tables
 plugin is last in the chain. Otherwise, the `Air` in `Air Conditioner` would render
 as raw markdown instead of being emphasized.
 
+## Fenced Code Blocks
+
+
+```javascript
+var foo = "bar";
+```
+
+You can also specify options. This editor was given the following options:
+
+```javascript
+Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
+Markdown.Extra.setup({fencedCodeBlocks: {wrapTag: "div",
+                                         wrapClass: "highlight"},
+                     });
+```
+
 </textarea>
         </div>
         <div id="wmd-preview-second" class="wmd-panel wmd-preview"></div>
 
-
         <script type="text/javascript">
             (function () {
+                Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
+
                 var converter1 = Markdown.getSanitizingConverter();
                 converter1.hooks.chain("preConversion", Markdown.Extra.tables);
+                converter1.hooks.chain("preConversion", Markdown.Extra.fencedCodeBlocks);
+
                 var editor1 = new Markdown.Editor(converter1);
+                editor1.hooks.chain("onPreviewRefresh", prettyPrint); // google code prettify
                 editor1.run();
                 
                 var converter2 = new Markdown.Converter();
@@ -91,6 +126,7 @@ as raw markdown instead of being emphasized.
                     return "This is a link to " + url.replace(/^https?:\/\//, "");
                 });
                 converter2.hooks.chain("preConversion", Markdown.Extra.tables);
+                converter2.hooks.chain("preConversion", Markdown.Extra.fencedCodeBlocks);
                 
                 var help = function () { alert("Do you need help?"); }
                 var options = {
@@ -98,6 +134,7 @@ as raw markdown instead of being emphasized.
                     strings: { quoteexample: "whatever you're quoting, put it right here" }
                 };
                 var editor2 = new Markdown.Editor(converter2, "-second", options);
+                editor2.hooks.chain("onPreviewRefresh", prettyPrint); // google code prettify
                 
                 editor2.run();
             })();

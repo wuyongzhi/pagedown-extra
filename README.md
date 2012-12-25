@@ -9,17 +9,26 @@ In order to use the extensions, you'll need to include
 `Markdown.Extra.js` after the Pagedown sources. Check out the
 demo for a working example.
 
-### Tables
-
-Only tables are working currently. To support tables in your editor, you
-just need to add a preConversion hook to your converter, like so:
+To get started using *all* available extensions, just add a preConversion
+hook to your converter, like so:
 
 ```javascript
 var converter = new Markdown.Converter();
-converter.hooks.chain("preConversion", Markdown.Extra.tables);
+converter.hooks.chain("preConversion", Markdown.Extra.all);
 ```
 
-Now you can use nice ascii-formatted tables:
+Otherwise, you can pick and choose from the extensions currently supported:
+
+```javascript
+// ascii tables
+converter.hooks.chain("preConversion", Markdown.Extra.tables);
+// fenced code blocks 
+converter.hooks.chain("preConversion", Markdown.Extra.fencedCodeBlocks);
+```
+
+### Tables
+
+Markdown.Extra supports ascii-formatted tables:
 
 ```markdown
 | Item      | Value | Qty |
@@ -29,7 +38,7 @@ Now you can use nice ascii-formatted tables:
 | Pipe      |    $1 |234  |
 ```
 
-Which would render to something like this depending on how you choose to style it:
+Which will render to something like this depending on how you choose to style it:
 
 | Item      | Value | Qty |
 | --------- | -----:|:--: |
@@ -37,29 +46,21 @@ Which would render to something like this depending on how you choose to style i
 | Phone     |   $12 | 12  |
 | Pipe      |    $1 |234  |
 
+You can also specify a class for the generated tables using
+`Markdown.Extra.setup({tables: {tableClass: "table table-striped"} })` for instance.
+
 See PHP Markdown Extra's [documentation][1] for a more complete overview
 of table syntax.
 
 ### Fenced Code Blocks
 
-Fenced code blocks are supported &agrave; la GitHub:
-
-```javascript
-var foo = 'bar';
-
-// a random comment
-function foo() {
-    console.log("Hi!");
-}
-```
-
-For example, given the following Markdown:
+Fenced code blocks are supported &agrave; la GitHub. This markdown:
 
     ```javascript
     var x = 2;
     ```
 
-This would be generated.
+Will be transformed into:
 
 ```html
 <pre>

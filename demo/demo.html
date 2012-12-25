@@ -112,8 +112,7 @@ Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
                 Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
 
                 var converter1 = Markdown.getSanitizingConverter();
-                converter1.hooks.chain("preConversion", Markdown.Extra.tables);
-                converter1.hooks.chain("preConversion", Markdown.Extra.fencedCodeBlocks);
+                converter1.hooks.chain("preConversion", Markdown.Extra.all);
 
                 var editor1 = new Markdown.Editor(converter1);
                 editor1.hooks.chain("onPreviewRefresh", prettyPrint); // google code prettify
@@ -126,8 +125,7 @@ Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
                 converter2.hooks.chain("plainLinkText", function (url) {
                     return "This is a link to " + url.replace(/^https?:\/\//, "");
                 });
-                converter2.hooks.chain("preConversion", Markdown.Extra.tables);
-                converter2.hooks.chain("preConversion", Markdown.Extra.fencedCodeBlocks);
+                converter2.hooks.chain("preConversion", Markdown.Extra.all);
                 
                 var help = function () { alert("Do you need help?"); }
                 var options = {

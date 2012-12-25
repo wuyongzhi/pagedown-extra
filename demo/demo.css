@@ -119,11 +119,13 @@ body
 	font-weight: bold;
 }
 
-.wmd-table {
+.wmd-preview table {
   border: 1px solid black;
+  border-collapse: collapse;
 }
 
-.wmd-table td {
+.wmd-preview table td {
   border: 1px solid black;
   padding: 5px;
 }
+

@@ -1,12 +1,12 @@
-verview
+#Overview
 
-This is a collection of Pagedown plugins to enable support for 
+This is a collection of [Pagedown][2] plugins to enable support for 
 Markdown Extra syntax. Open `demo/demo.html` to try it yourself.
 
-## Usage 
+## Usage
 
 In order to use the extensions, you'll need to include
-`Markdown.Extra.js` after the [Pagedown sources][2]. Check out the
+`Markdown.Extra.js` after the Pagedown sources. Check out the
 demo for a working example.
 
 ### Tables
@@ -53,44 +53,33 @@ function foo() {
 }
 ```
 
-You can specify a highlighter by passing an options object to `Markdown.Extra.setup`:
+For example, given the following Markdown:
+
+    ```javascript
+    var x = 2;
+    ```
+
+This would be generated.
+
+```html
+<pre>
+    <code>var x = 2;</code>
+</pre>
+```
+
+You can specify a syntax highlighter by passing an options object to `Markdown.Extra.setup`.
+Both [google-code-prettify][3] and [Highlight.js][4] are currently supported:
 
 ```javascript
 // highlighter can be either `prettify` or `highlight`
 Markdown.Extra.setup({fencedCodeBlocks: {highlighter:"prettify"}});
 ```
 
-Both [google-code-prettify][3] and [Highlight.js][4] are currently supported.
-For example, given the following markdown:
-
-    ```javascript
-    var x = 2;
-    ```
-
-Using google-code-prettify, it becomes:
-
-```html
-<pre class="highlight">
-   <code class="language-javascript">var x = 2;</code>
-</pre>
-```
-
-And using highlight.js:
-```html
-<pre>
-   <code class="language-javascript">var x = 2;</code>
-</pre>
-```
-
-Currently, the default is just to add the class `wmd-code-block` to the `<code>` tag:
-```html
-<pre>
-   <code class="wmd-code-block">var x = 2;</code>
-</pre>
-```
-
-It's up to you to include the corresponding js and css so that these are styled appropriately. See
-the demo for an example using highlight.js.
+If either of those is specified, the language type will be added to the code tag, e.g.
+`<code class="language-javascript">`. If `prettify` is specified, `<pre>` also becomes
+`<pre class="prettyprint">`. Otherwise, the markup is the same as what Pagedown
+produces for regular indented code blocks. See the demo for an example
+using [google-code-prettify][3].
 
 ## Important
 
@@ -98,13 +87,13 @@ Also note that these extensions only work with the vanilla Markdown converter. I
 use the converter returned by `Markdown.getSanitizingConverter()`, all of
 the `table`-related tags and `code` tags will be stripped from the output.
 
-###License
+##License
 
 MIT: http://justinm.mit-license.org
 
 [1]: http://michelf.ca/projects/php-markdown/extra/#table "Markdown Extra Table Documentation"
 [2]: http://code.google.com/p/pagedown/ "Pagedown - Google Code"
 [3]: http://code.google.com/p/google-code-prettify/ "Prettify"
-[4]: http://softwaremaniacs.org/soft/highlight/en/ "Highlight.js"
+[4]: http://softwaremaniacs.org/soft/highlight/en/ "HighlightJs"
 
 

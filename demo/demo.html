@@ -29,7 +29,7 @@ Just plain **Markdown**, except that the input is sanitized:
 
 ## Tables 
 
-Notice: this won't work since the sanitizing converter will strip
+Note: this won't work since the sanitizing converter will strip
 out all of the table-related tags. Check out the second editor though.
 
 | Item      | Value |
@@ -44,13 +44,14 @@ out all of the table-related tags. Check out the second editor though.
 var foo = "bar";
 ```
 
-You can also specify options. This editor was given the following options:
+You can also specify options. Markdown.Extra was given the following options
+for this page.
 
 ```javascript
 Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
 ```
 
-The wrap tag and class don't work here though, again due to the sanitizing converter.
+Again, the sanitizing converter strips all the nice tags we just added.
 
 </textarea>
         </div>
@@ -70,6 +71,8 @@ a nicer link text. User input isn't sanitized here:
 
 <marquee>I'm the ghost from the past!</marquee>
 
+# Markdown Extra
+
 ## Tables 
 
 | Item             | Value |
@@ -78,9 +81,10 @@ a nicer link text. User input isn't sanitized here:
 | <del>Phone</del> |   $12 |
 | *Pipe*           |    $1 |
 
-This should work flawlessly. Notice that span-level tags will still be rendered
-inside of the table. Also, the generated table will have a class of `wmd-table`,
-to allow for easy styling. Here I've added just some base borders and padding.
+This should work flawlessly. Here I've added just some basic borders and padding.
+Notice that span-level tags will still be rendered
+inside of the table. Also, you can specify a class for the generated tables using
+`Markdown.Extra.setup({tables: {tableClass: "table table-striped"} })` for instance.
 
 Take a look at the source and you'll see that the tables
 plugin is last in the chain. Otherwise, the `Air` in `Air Conditioner` would render
@@ -88,18 +92,15 @@ as raw markdown instead of being emphasized.
 
 ## Fenced Code Blocks
 
-
 ```javascript
 var foo = "bar";
 ```
 
-You can also specify options. This editor was given the following options:
+You can also specify additional options. Markdown.Extra was given the following options
+for this page.
 
 ```javascript
 Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
-Markdown.Extra.setup({fencedCodeBlocks: {wrapTag: "div",
-                                         wrapClass: "highlight"},
-                     });
 ```
 
 </textarea>

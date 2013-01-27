@@ -29,14 +29,15 @@ Just plain **Markdown**, except that the input is sanitized:
 
 ## Tables 
 
-Note: this won't work since the sanitizing converter will strip
-out all of the table-related tags. Check out the second editor though.
+| Item             | Value |
+| ---------------- | -----:|
+| Air Conditioner  | $1600 |
+| <del>Phone</del> |   $12 |
+| *Pipe*           |    $1 |
 
-| Item      | Value |
-| --------- | -----:|
-| Computer  | $1600 |
-| Phone     |   $12 |
-| Pipe      |    $1 |
+I've added just some basic borders and padding. Notice that span-level tags will
+still be rendered inside of the table. Also, you can specify a class for the generated
+tables using `Markdown.Extra.init(converter, {tableClass: "table table-striped"})` for instance.
 
 ## Fenced Code Blocks
 
@@ -45,13 +46,16 @@ var foo = "bar";
 ```
 
 You can also specify options. Markdown.Extra was given the following options
-for this page.
+for this editor.
 
 ```javascript
-Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
+  Markdown.Extra.init(converter1, {
+    extensions: "all",
+    highlighter: "prettify"
+  });
 ```
 
-Again, the sanitizing converter strips all the nice tags we just added.
+
 
 </textarea>
         </div>
@@ -81,10 +85,9 @@ a nicer link text. User input isn't sanitized here:
 | <del>Phone</del> |   $12 |
 | *Pipe*           |    $1 |
 
-This should work flawlessly. Here I've added just some basic borders and padding.
-Notice that span-level tags will still be rendered
-inside of the table. Also, you can specify a class for the generated tables using
-`Markdown.Extra.setup({tables: {tableClass: "table table-striped"} })` for instance.
+I've added just some basic borders and padding. Notice that span-level tags will
+still be rendered inside of the table. Also, you can specify a class for the generated
+tables using `Markdown.Extra.init({tableClass: "table table-striped"})` for instance.
 
 Take a look at the source and you'll see that the tables
 plugin is last in the chain. Otherwise, the `Air` in `Air Conditioner` would render
@@ -97,36 +100,45 @@ var foo = "bar";
 ```
 
 You can also specify additional options. Markdown.Extra was given the following options
-for this page.
+for this editor.
 
 ```javascript
-Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
+  Markdown.Extra.init(converter2, {
+    extensions: "all",
+    highlighter: "prettify"
+  });
 ```
 
+(asterisks around "all" are from the preConversion hook)
 </textarea>
         </div>
         <div id="wmd-preview-second" class="wmd-panel wmd-preview"></div>
 
         <script type="text/javascript">
             (function () {
-                Markdown.Extra.setup({fencedCodeBlocks: {highlighter: "prettify"} });
 
                 var converter1 = Markdown.getSanitizingConverter();
-                converter1.hooks.chain("preConversion", Markdown.Extra.all);
+                Markdown.Extra.init(converter1, {
+                  extensions: "all",
+                  highlighter: "prettify"
+                });
 
                 var editor1 = new Markdown.Editor(converter1);
                 editor1.hooks.chain("onPreviewRefresh", prettyPrint); // google code prettify
                 editor1.run();
                 
                 var converter2 = new Markdown.Converter();
+
                 converter2.hooks.chain("preConversion", function (text) {
                     return text.replace(/\b(a\w*)/gi, "*$1*");
                 });
                 converter2.hooks.chain("plainLinkText", function (url) {
                     return "This is a link to " + url.replace(/^https?:\/\//, "");
                 });
-                converter2.hooks.chain("preConversion", Markdown.Extra.all);
                 
+                // "all" is the default
+                Markdown.Extra.init(converter2, {highlighter: "prettify"});
+
                 var help = function () { alert("Do you need help?"); }
                 var options = {
                     helpButton: { handler: help },

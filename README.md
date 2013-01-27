@@ -3,28 +3,33 @@
 This is a collection of [Pagedown][2] plugins to enable support for 
 Markdown Extra syntax. Open `demo/demo.html` to try it yourself.
 
+These extensions work equally well with both the default converter and the 
+sanitizing converter.
+
 ## Usage
 
 In order to use the extensions, you'll need to include
 `Markdown.Extra.js` after the Pagedown sources. Check out the
 demo for a working example.
 
-To get started using *all* available extensions, just add a preConversion
-hook to your converter, like so:
 
 ```javascript
 var converter = new Markdown.Converter();
-converter.hooks.chain("preConversion", Markdown.Extra.all);
+Markdown.Extra.init(converter, {extensions: "all"});
+// options object is unnecessary in this case -- "all" is the default
 ```
 
-Otherwise, you can pick and choose from the extensions currently supported:
+Otherwise, you can choose from the extensions currently supported:
 
 ```javascript
 // ascii tables
-converter.hooks.chain("preConversion", Markdown.Extra.tables);
+Markdown.Extra.init(converter, {extensions: "tables"});
 // fenced code blocks 
-converter.hooks.chain("preConversion", Markdown.Extra.fencedCodeBlocks);
+Markdown.Extra.init(converter, {extensions: "fencedCodeBlocks"});
 ```
+
+If you're using multiple converters on the same page, you can just call
+`Markdown.Extra.init` once for each converter and you're all set.
 
 ### Tables
 
@@ -47,7 +52,7 @@ Which will render to something like this depending on how you choose to style it
 | Pipe      |    $1 |234  |
 
 You can also specify a class for the generated tables using
-`Markdown.Extra.setup({tables: {tableClass: "table table-striped"} })` for instance.
+`Markdown.Extra.init(converter, {tableClass: "table table-striped"})` for instance.
 
 See PHP Markdown Extra's [documentation][1] for a more complete overview
 of table syntax.
@@ -68,12 +73,12 @@ Will be transformed into:
 </pre>
 ```
 
-You can specify a syntax highlighter by passing an options object to `Markdown.Extra.setup`.
+You can specify a syntax highlighter by passing an options object to `Markdown.Extra.init`.
 Both [google-code-prettify][3] and [Highlight.js][4] are currently supported:
 
 ```javascript
 // highlighter can be either `prettify` or `highlight`
-Markdown.Extra.setup({fencedCodeBlocks: {highlighter:"prettify"}});
+Markdown.Extra.init(converter, {highlighter:"prettify"});
 ```
 
 If either of those is specified, the language type will be added to the code tag, e.g.
@@ -81,12 +86,6 @@ If either of those is specified, the language type will be added to the code tag
 `<pre class="prettyprint">`. Otherwise, the markup is the same as what Pagedown
 produces for regular indented code blocks. See the demo for an example
 using [google-code-prettify][3].
-
-## Important
-
-Also note that these extensions only work with the vanilla Markdown converter. If you
-use the converter returned by `Markdown.getSanitizingConverter()`, all of
-the `table`-related tags and `code` tags will be stripped from the output.
 
 ##License
 

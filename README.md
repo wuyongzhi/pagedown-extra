@@ -2,9 +2,9 @@
 
 This is a collection of [Pagedown][2] plugins to enable support for 
 Markdown Extra syntax. Open `demo/demo.html` to try it yourself.
+To run the tests, just open SpecRunner.html in your browser.
 
-These extensions work equally well with both the default converter and the 
-sanitizing converter.
+These extensions work equally well with both the default and sanitizing converters.
 
 ## Usage
 

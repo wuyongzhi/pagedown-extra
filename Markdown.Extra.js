@@ -27,7 +27,7 @@
 
     options = options || {};
     options.extensions = options.extensions || [];
-    if (options.extensions.length == 0 || options.extensions.indexOf("all") != -1) {
+    if (options.extensions.length === 0 || options.extensions.indexOf("all") != -1) {
       converter.hooks.chain("preConversion", function(text) {
         return extra.all(text);
       });
@@ -56,6 +56,9 @@
     if (typeof options.tableClass != "undefined") {
         extra.tableClass = options.tableClass;
     }
+
+    // user usually won't need this. But it's handy for testing.
+    return extra;
   };
 
   function strip(str) {

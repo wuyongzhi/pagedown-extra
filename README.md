@@ -2,7 +2,7 @@
 
 This is a collection of [Pagedown][2] plugins to enable support for 
 Markdown Extra syntax. Open `demo/demo.html` to try it yourself.
-To run the tests, just open SpecRunner.html in your browser.
+To run the tests, just open `SpecRunner.html` in your browser.
 
 These extensions work equally well with both the default and sanitizing converters.
 
@@ -11,7 +11,6 @@ These extensions work equally well with both the default and sanitizing converte
 In order to use the extensions, you'll need to include
 `Markdown.Extra.js` after the Pagedown sources. Check out the
 demo for a working example.
-
 
 ```javascript
 var converter = new Markdown.Converter();
@@ -61,7 +60,7 @@ of table syntax.
 
 Fenced code blocks are supported &agrave; la GitHub. This markdown:
 
-    ```javascript
+    ```
     var x = 2;
     ```
 
@@ -73,19 +72,31 @@ Will be transformed into:
 </pre>
 ```
 
-You can specify a syntax highlighter by passing an options object to `Markdown.Extra.init`.
+You can specify a syntax highlighter in the options object passed to `Markdown.Extra.init`.
 Both [google-code-prettify][3] and [Highlight.js][4] are currently supported:
 
 ```javascript
 // highlighter can be either `prettify` or `highlight`
-Markdown.Extra.init(converter, {highlighter:"prettify"});
+Markdown.Extra.init(converter, {highlighter: "prettify"});
 ```
 
 If either of those is specified, the language type will be added to the code tag, e.g.
 `<code class="language-javascript">`. If `prettify` is specified, `<pre>` also becomes
 `<pre class="prettyprint">`. Otherwise, the markup is the same as what Pagedown
-produces for regular indented code blocks. See the demo for an example
-using [google-code-prettify][3].
+produces for regular indented code blocks.  For example, when using
+`{highlighter: "prettify"}` as shown above, this:
+
+    ```javascript
+    var x = 2;
+    ```
+
+Would generate the following html:
+
+```html
+<pre class="prettyprint">
+    <code class="language-javascript">var x = 2;</code>
+</pre>
+```
 
 ##License
 
@@ -95,5 +106,4 @@ MIT: http://justinm.mit-license.org
 [2]: http://code.google.com/p/pagedown/ "Pagedown - Google Code"
 [3]: http://code.google.com/p/google-code-prettify/ "Prettify"
 [4]: http://softwaremaniacs.org/soft/highlight/en/ "HighlightJs"
-
 

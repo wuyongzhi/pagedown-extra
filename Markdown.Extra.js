@@ -1,28 +1,28 @@
 (function () {
   Markdown.Extra = function() {
 
-    // for converting internal markdown (in tables for instance).
-    // this is necessary since these methods are meant to be called as
+    // For converting internal markdown (in tables for instance).
+    // This is necessary since these methods are meant to be called as
     // preConversion hooks, and the Markdown converter passed to init()
-    // won't convert any markdown contained in the html we return
+    // won't convert any markdown contained in the html tags we return.
     this.sanitizingConverter = Markdown.getSanitizingConverter();
 
-    // to store blocks of code we generate in preConversion, so
+    // Stores html blocks we generate in preConversion hooks so that
     // they're not destroyed if the user is using a sanitizing converter
     this.hashBlocks = [];
 
-    // fenced code block options
+    // Fenced code block options
     this.googleCodePrettify = false;
     this.highlightJs = false;
 
-    // table options
+    // Table options
     this.tableClass = 'wmd-table';
   };
 
 
-  // Each call to init creates a new instance of Markdown.Extra so it's
-  // safe to have multiple editors/converters on a single page
   Markdown.Extra.init = function(converter, options) {
+    // Each call to init creates a new instance of Markdown.Extra so it's
+    // safe to have multiple converters on a single page
     var extra = new Markdown.Extra();
 
     options = options || {};
@@ -57,7 +57,7 @@
         extra.tableClass = options.tableClass;
     }
 
-    // user usually won't need this. But it's handy for testing.
+    // Caller usually won't need this, but it's handy for testing.
     return extra;
   };
 
@@ -65,24 +65,30 @@
     return str.replace(/^\s+|\s+$/g, '');
   }
 
+  // Returns the tag if it matches the whitelist, else return empty string
   function sanitizeTag(tag, whitelist) {
     if (tag.match(whitelist))
       return tag;
     return '';
   }
 
+  // Sanitizes html, removing tags that aren't in the whitelist
   function sanitizeHtml(html, whitelist) {
     return html.replace(/<[^>]*>?/gi, function(match) {
       return sanitizeTag(match, whitelist);
     });
   }
 
+  // Replace `block` in `text` with a placeholder containing a key,
+  // where the key is the block's index in the hashBlocks array.
   Markdown.Extra.prototype.hashBlock = function(text, block) {
     var key = this.hashBlocks.push(block) - 1;
     var rep = '<p>{{wmd-block-key=' + key + '}}</p>';
     return text.replace(block, rep);
   };
 
+  // Replace placeholder blocks in `text` with their corresponding
+  // html blocks in the hashBlocks array.
   Markdown.Extra.prototype.unHashBlocks = function(text) {
     var re = new RegExp('<p>{{wmd-block-key=(\\d+)}}</p>', 'gm');
     while(match = re.exec(text)) {
@@ -92,19 +98,23 @@
     return text;
   };
 
+  // Find and convert Markdown Extra tables into html.
   Markdown.Extra.prototype.tables = function(text) {
     // Whitelist used as a post-processing step after calling convert.makeHtml()
     // to keep only span-level tags inside tables per the PHP Markdown Extra spec.
     var whitelist = /^(<\/?(b|del|em|i|s|sup|sub|strong|strike)>|<(br)\s?\/?>)$/i;
     var that = this;
 
+    // Convert markdown withing the table, retaining only span-level tags
     function convertInline(text) {
       var html = that.sanitizingConverter.makeHtml(text);
       return sanitizeHtml(html, whitelist);
     }
 
+    // Split a row into columns
     function splitRow(row, border) {
       var r = strip(row);
+      // remove initial/final pipes if they exist
       if (border) {
         if (r.indexOf('|') === 0)
           r = r.slice(1);
@@ -116,14 +126,16 @@
       for (var i = 0; i < cols.length; i++)
         cols[i] = strip(cols[i]);
 
-      return cols; }
+      return cols;
+    }
 
+    // Convert a single row of a markdown table into html.
     function buildRow(line, border, align, isHeader) {
       var rowHtml = '<tr>';
       var cols = splitRow(line, border);
       var style, cellStart, cellEnd, content;
 
-      // use align to ensure each row has same number of columns
+      // Use align to ensure each row has same number of columns
       for (var i = 0; i < align.length; i++) {
         style = align[i] && !isHeader ? ' style="text-align:' + align[i] + ';"' : '';
         cellStart = isHeader ? '<th'+style+'>' : '<td'+style+'>';
@@ -135,8 +147,8 @@
       return rowHtml + "</tr>";
     }
 
-   // find next block (group of lines matching our definition of a table)
-   function findNextBlock(text) {
+    // Find next block (group of lines matching our definition of a table) in `text`
+    function findNextBlock(text) {
       lines = text.split('\n');
       var block = [], ndx = 0, bounds = {};
       for (var i = 0; i < lines.length; i++) {
@@ -150,10 +162,11 @@
             block.push(line);
             ndx++;
         } else { // invalid line
-          if (block.length > 2) {// need head, sep, body
+          if (block.length >= 3) {// valid table needs head, sep, body
             bounds.end = i - 1;
             return {block: block, bounds: bounds, lines: lines};
           }
+          // reset and continue
           block = [];
           bounds = {};
           ndx = 0;
@@ -170,7 +183,6 @@
             lines = blockdata.lines,
             header = strip(block[0]),
             sep = strip(block[1]),
-            rows = strip(block[2]),
             border = false;
 
         if (header.indexOf('|') === 0 ||
@@ -193,10 +205,12 @@
             align.push(null);
         }
 
-        // build html. the id here is only temporary
-        var cls = that.tableClass === '' ? '' : ' class="'+that.tableClass+'"';
-        var tableHtml = '<table' + cls + '>' +
-          buildRow(block[0], border, align, true);
+        // build html.
+        var cls = that.tableClass === '' ? '' :
+          ' class="' + that.tableClass + '"';
+        var head = buildRow(block[0], border, align, true);
+
+        var tableHtml = ['<table', cls, '>', head].join('');
         for (j = 2; j < block.length; j++)
           tableHtml += buildRow(block[j], border, align, false);
         tableHtml += "</table>\n";
@@ -214,13 +228,10 @@
     }
 
     return makeTables(text);
-  }; // Markdown.Extra.tables
+  };
 
-  // gfm-inspired fenced code blocks
+  // Find and convert gfm-inspired fenced code blocks into html.
   Markdown.Extra.prototype.fencedCodeBlocks = function(text) {
-    // Next three functions stolen from Markdown.Converter.js.
-    // Could've modified the converter source to make them
-    // available but we want this to work with stock pagedown.
     function encodeCode(code) {
       code = code.replace(/&/g, "&amp;");
       code = code.replace(/</g, "&lt;");
@@ -230,24 +241,25 @@
 
     // TODO: ignore within block-level tags
     var re = new RegExp(
-      '(\\n\\n|^\\n?)' +         // separator, $1 = leading whitespace
-      '^```(\\w+)?\\s*\\n' +     // opening fence, $2 = optional lang
-      '([\\s\\S]*?)' +           // $3 = code block content (no dotAll in js - dot doesn't match newline)
-      '^```\\s*\\n',             // closing fence
-      'gm');                     // Flags : global, multiline
+      '(\\n\\n|^\\n?)' +      // separator, $1 = leading whitespace
+      '^```(\\w+)?\\s*\\n' +  // opening fence, $2 = optional lang
+      '([\\s\\S]*?)' +        // $3 = code block content (no dotAll in js - dot doesn't match newline)
+      '^```\\s*\\n',          // closing fence
+      'gm'                    // Flags : global, multiline
+    );
 
-    var match, codeblock, codeclass, first, last;
+    var match;
     while (match = re.exec(text)) {
-      preclass = this.googleCodePrettify ? ' class="prettyprint"' : '';
-      codeclass = '';
+      var preclass = this.googleCodePrettify ? ' class="prettyprint"' : '';
+      var codeclass = '';
       if (typeof match[2] != "undefined" && (this.googleCodePrettify || this.highlightJs))
         codeclass = ' class="language-' + match[2] + '"';
-      codeblock = '<pre' + preclass + '><code' + codeclass + '>';
+      var codeblock = '<pre' + preclass + '><code' + codeclass + '>';
       codeblock += encodeCode(match[3]) + '</code></pre>';
 
       // replace markdwon with generated html code block
-      first = text.substring(0, match.index) + '\n\n';
-      last = '\n\n' + text.substr(match.index + match[0].length);
+      var first = text.substring(0, match.index) + '\n\n';
+      var last = '\n\n' + text.substr(match.index + match[0].length);
       text = first + codeblock + last;
 
       // replace codeblock with placeholder until postConversion step

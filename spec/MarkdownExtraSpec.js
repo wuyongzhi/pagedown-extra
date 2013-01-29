@@ -1,13 +1,26 @@
 describe("Markdown.Extra", function() {
   // basic code block
   var codeBlock = "```foolang\nfoo=bar;\n```\n";
+  // expected code block html
+  var codeBlockHtml ="<pre><code>foo=bar;\n</code></pre>";
+
   // basic table
-  var table = "h1 | h2 | h3\n:- | :-: | -:\n1 | 2 | 3\n";
-  var tableVerbose = "| h1 | h2 | h3 |\n| :- | :-: | -: |\n| 1 | 2 | 3 |\n";
+  var table = "h1 | h2 | h3\n:- | :-: | -:\n1 | 2 | 3";
+  var tableVerbose = "| h1 | h2 | h3 |\n| :- | :-: | -: |\n| 1 | 2 | 3 |";
+  // expected table html
+  var tableHtml ='<table class="wmd-table">' +
+    '<tr><th>h1</th><th>h2</th><th>h3</th></tr>' +
+    '<tr><td style="text-align:left;">1</td>' +
+    '<td style="text-align:center;">2</td>' +
+    '<td style="text-align:right;">3</td></tr></table>';
+
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
     "\n\nCool. And a link: [google](http://www.google.com)";
 
+  function strip(str) {
+    return str.replace(/^\s+|\s+$/g, '');
+  }
 
   describe("when setting options", function() {
     var converter;
@@ -19,34 +32,34 @@ describe("Markdown.Extra", function() {
     it("should default to use 'all' extensions", function() {
       var extra = Markdown.Extra.init(converter);
       spyOn(extra, "all").andCallThrough();
-      converter.makeHtml('*test*');
+      converter.makeHtml(markdown);
       expect(extra.all).toHaveBeenCalled();
     });
 
     it("should use 'all' extensions if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "all"});
       spyOn(extra, "all").andCallThrough();
-      converter.makeHtml('*test*');
+      converter.makeHtml(markdown);
       expect(extra.all).toHaveBeenCalled();
     });
 
     it("should use 'tables' extension if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "tables"});
       spyOn(extra, "tables").andCallThrough();
-      converter.makeHtml('*test*');
+      converter.makeHtml(markdown);
       expect(extra.tables).toHaveBeenCalled();
     });
 
     it("should use 'fencedCodeBlocks' extension if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "fencedCodeBlocks"});
       spyOn(extra, "fencedCodeBlocks").andCallThrough();
-      converter.makeHtml('*test*');
+      converter.makeHtml(markdown);
       expect(extra.fencedCodeBlocks).toHaveBeenCalled();
     });
 
     it("should apply table class if specified", function() {
       Markdown.Extra.init(converter, {tableClass: "table-striped"});
-      var html = converter.makeHtml('h1 | h2 | h3\n:-: | :-: | :-:\n1 | 2 | 3\n');
+      var html = converter.makeHtml(table);
       expect(html).toMatch(/^<table class="table-striped">/);
     });
 
@@ -72,6 +85,11 @@ describe("Markdown.Extra", function() {
         Markdown.Extra.init(sconv, {extensions: "fencedCodeBlocks"});
       });
 
+      it("should convert code blocks correctly", function() {
+        var html = strip(sconv.makeHtml(codeBlock));
+        expect(html).toEqual(codeBlockHtml);
+      });
+
       it("should recognize code blocks at beginning of input", function() {
         var html = sconv.makeHtml(codeBlock + '\n\n' + markdown);
         expect(html).toMatch(/<pre>/);
@@ -82,6 +100,7 @@ describe("Markdown.Extra", function() {
         expect(html).toMatch(/<pre>/);
       });
 
+      // TODO: remove this requirement
       it("should not recognize code blocks that aren't followed by a newline", function() {
         var html = sconv.makeHtml('```foolang\nfoo=bar\n```');
         expect(html).not.toMatch(/<pre>/);
@@ -96,6 +115,11 @@ describe("Markdown.Extra", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();
         Markdown.Extra.init(sconv, {extensions: "tables"});
+      });
+
+      it("should convert tables properly", function() {
+        var html = strip(sconv.makeHtml(table));
+        expect(html).toEqual(tableHtml);
       });
 
       it("should recognize tables at beginning of input", function() {
@@ -126,6 +150,12 @@ describe("Markdown.Extra", function() {
         var html1 = sconv.makeHtml(table);
         var html2 = sconv.makeHtml(tableVerbose);
         expect(html1).toEqual(html2);
+      });
+
+      it('should not create tables if pipes are escaped', function() {
+        var escapedTable = "h1 \\| h2 \\| h3\n:- | :-: | -:\n1 | 2 | 3";
+        var html = sconv.makeHtml(escapedTable);
+        expect(html).not.toMatch(/table/);
       });
 
       /*

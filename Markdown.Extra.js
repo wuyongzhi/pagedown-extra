@@ -151,16 +151,29 @@
       return rowHtml + "</tr>";
     }
 
+    function isTableRow(line, ndx) {
+      var pipes = line.match(/\|/g);
+      var escapedPipes = line.match(/\\\|/g);
+      var pCount = pipes === null ? 0 : pipes.length;
+      var epCount = escapedPipes === null ? 0 : escapedPipes.length;
+      // if all pipes are escaped, then we don't interpret it as a table row
+      if (pCount == epCount)
+        return false;
+
+      if (ndx == 1 && pCount > 0)
+        return contains(line, '-');
+
+      return pCount > 0;
+    }
+
     // Find next block (group of lines matching our definition of a table) in `text`
     function findNextBlock(text) {
-      lines = text.split('\n');
+      var lines = text.split('\n');
       var block = [], ndx = 0, bounds = {};
       for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        // TODO: add ability to escape |, : per PHP Markdown Extra spec
         // TODO: ignore within gfm code blocks and all block-level tags
-        if ( (ndx != 1 && contains(line, '|')) ||
-             (ndx == 1 && contains(line, '-') && contains(line, '|')) ) {
+        if (isTableRow(line, ndx)) {
             if (typeof bounds.start == "undefined")
               bounds.start = i;
             block.push(line);

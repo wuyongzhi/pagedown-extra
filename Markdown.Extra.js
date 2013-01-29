@@ -65,6 +65,10 @@
     return str.replace(/^\s+|\s+$/g, '');
   }
 
+  function contains(str, substr) {
+    return str.indexOf(substr) != -1;
+  }
+
   // Returns the tag if it matches the whitelist, else return empty string
   function sanitizeTag(tag, whitelist) {
     if (tag.match(whitelist))
@@ -154,24 +158,32 @@
       for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
         // TODO: add ability to escape |, : per PHP Markdown Extra spec
-        // TODO: use a regex to find blocks. make sure blocks end with blank line
         // TODO: ignore within gfm code blocks and all block-level tags
-        if (line.indexOf('|') != -1 && (ndx != 1 || line.indexOf('-') != -1)) {
+        if ( (ndx != 1 && contains(line, '|')) ||
+             (ndx == 1 && contains(line, '-') && contains(line, '|')) ) {
             if (typeof bounds.start == "undefined")
               bounds.start = i;
             block.push(line);
             ndx++;
         } else { // invalid line
-          if (block.length >= 3) {// valid table needs head, sep, body
-            bounds.end = i - 1;
-            return {block: block, bounds: bounds, lines: lines};
+          if (block.length < 3) { // valid table needs head, sep, body
+            // reset and continue
+            block = [];
+            bounds = {};
+            ndx = 0;
+          } else {
+            break;
           }
-          // reset and continue
-          block = [];
-          bounds = {};
-          ndx = 0;
         }
       }
+
+      // this is outside the for loop b/c it's possble that we
+      // never ran into an invalid line -- i.e. block ends at end of text
+      if (block.length >= 3) {
+          bounds.end = bounds.start + block.length;
+          return {block: block, bounds: bounds, lines: lines};
+      }
+
       return null;
     }
 

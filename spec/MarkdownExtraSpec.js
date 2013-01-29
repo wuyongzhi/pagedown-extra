@@ -103,14 +103,9 @@ describe("Markdown.Extra", function() {
         expect(html).toMatch(/table/);
       });
 
-      it("should recognize tables surrounded by blank lines", function() {
-        var html = sconv.makeHtml('\n' + table + '\n');
+      it("should recognize tables at end of input", function() {
+        var html = sconv.makeHtml('markdown' + '\n\n' + table);
         expect(html).toMatch(/table/);
-      });
-
-      it("should not recognize tables that aren't followed by a newline", function() {
-        var html = sconv.makeHtml("h1 | h2 | h3\n:- | :-: | -:\n1 | 2 | 3");
-        expect(html).not.toMatch(/table/);
       });
 
       it("should have correct number of columns", function() {

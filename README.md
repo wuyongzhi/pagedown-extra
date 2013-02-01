@@ -2,7 +2,10 @@
 
 This is a collection of [Pagedown][2] plugins to enable support for 
 Markdown Extra syntax. Open `demo/demo.html` to try it yourself.
-To run the tests, just open `spec/SpecRunner.html` in your browser.
+To run the tests, just open `spec/SpecRunner.html` in your browser. Or, to
+run a browser-less test from the command line, run `bundle install` followed
+by `bundle exec rake`. You'll need Ruby and the rake gem if you use
+the second method.
 
 These extensions work equally well with both the default and sanitizing converters.
 
@@ -54,6 +57,11 @@ Which will render to something like this depending on how you choose to style it
 
 You can also specify a class for the generated tables using
 `Markdown.Extra.init(converter, {tableClass: "table table-striped"})` for instance.
+
+Within markdown tables, markdown inside of table cells will also be converted. By
+default a sanitizing converter is used, but you can change this by adding `sanitize: false`
+to the options object passed to `init`. Only span-level tags are retained
+inside of table cells, per the PHP Markdown Extra spec.
 
 See PHP Markdown Extra's [documentation][1] for a more complete overview
 of table syntax.

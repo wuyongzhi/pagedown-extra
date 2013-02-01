@@ -5,7 +5,7 @@
     // This is necessary since these methods are meant to be called as
     // preConversion hooks, and the Markdown converter passed to init()
     // won't convert any markdown contained in the html tags we return.
-    this.sanitizingConverter = Markdown.getSanitizingConverter();
+    this.converter = null;
 
     // Stores html blocks we generate in preConversion hooks so that
     // they're not destroyed if the user is using a sanitizing converter
@@ -49,12 +49,20 @@
     });
 
     if (typeof options.highlighter != "undefined") {
-        extra.googleCodePrettify = options.highlighter === 'prettify';
-        extra.highlightJs = options.highlighter === 'highlight';
+      extra.googleCodePrettify = options.highlighter === 'prettify';
+      extra.highlightJs = options.highlighter === 'highlight';
     }
 
     if (typeof options.tableClass != "undefined") {
-        extra.tableClass = options.tableClass;
+      extra.tableClass = options.tableClass;
+    }
+
+    // we can't just use the same converter that the user passes in, as
+    // Pagedown forbids it and will throw an exception if we do so
+    if (typeof options.sanitize == "undefined" || options.sanitize) {
+      extra.converter = Markdown.getSanitizingConverter(); // default
+    } else {
+      extra.converter = new Markdown.Converter();
     }
 
     // Caller usually won't need this, but it's handy for testing.
@@ -104,15 +112,21 @@
 
   // Find and convert Markdown Extra tables into html.
   Markdown.Extra.prototype.tables = function(text) {
-    // Whitelist used as a post-processing step after calling convert.makeHtml()
+    // Needed for post-processing step after calling convert.makeHtml()
     // to keep only span-level tags inside tables per the PHP Markdown Extra spec.
-    var whitelist = /^(<\/?(b|del|em|i|s|sup|sub|strong|strike)>|<(br)\s?\/?>)$/i;
+    var inlineTags = new RegExp(['^(<\\/?(a|abbr|acronym|applet|area|b|basefont|',
+                                'bdo|big|button|cite|code|del|dfn|em|figcaption|',
+                                'font|i|iframe|img|input|ins|kbd|label|map|',
+                                'mark|meter|object|param|progress|q|ruby|rp|rt|s|',
+                                'samp|script|select|small|span|strike|strong|',
+                                'sub|sup|textarea|time|tt|u|var|wbr)>|',
+                                '<(br)\\s?\\/?>)$'].join(''), 'i');
     var that = this;
 
-    // Convert markdown withing the table, retaining only span-level tags
+    // Convert markdown within the table, retaining only span-level tags
     function convertInline(text) {
-      var html = that.sanitizingConverter.makeHtml(text);
-      return sanitizeHtml(html, whitelist);
+      var html = that.converter.makeHtml(text);
+      return sanitizeHtml(html, inlineTags);
     }
 
     // Split a row into columns

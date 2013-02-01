@@ -14,6 +14,9 @@ describe("Markdown.Extra", function() {
     '<td style="text-align:center;">2</td>' +
     '<td style="text-align:right;">3</td></tr></table>';
 
+  // table containing inline and block-level tags and markdown
+  var tableComplex = "h1|h2|h3\n-|-|-\n`code`|##hdr##|<script></script>";
+
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
     "\n\nCool. And a link: [google](http://www.google.com)";
@@ -74,6 +77,25 @@ describe("Markdown.Extra", function() {
       var html = converter.makeHtml(codeBlock);
       expect(html).toMatch(/^<pre class="prettyprint"><code class="language-foolang">/);
     });
+
+    it("should use sanitizing converter by default for markdown inside tables", function() {
+      Markdown.Extra.init(converter);
+      var html = converter.makeHtml(tableComplex);
+      expect(html).not.toMatch(/<script>/);
+    });
+
+    it("should use sanitizing converter if specified for markdown inside tables", function() {
+      Markdown.Extra.init(converter, {sanitize: true});
+      var html = converter.makeHtml(tableComplex);
+      expect(html).not.toMatch(/<script>/);
+    });
+
+    it("should use regular converter if specified for markdown inside tables", function() {
+      Markdown.Extra.init(converter, {sanitize: false});
+      var html = converter.makeHtml(tableComplex);
+      expect(html).toMatch(/<script>/);
+    });
+
   });
 
   describe("when using the sanitizing converter", function() {
@@ -81,7 +103,7 @@ describe("Markdown.Extra", function() {
 
     describe("with fenced code blocks", function() {
       beforeEach(function() {
-        sconv= Markdown.getSanitizingConverter();
+        sconv = Markdown.getSanitizingConverter();
         Markdown.Extra.init(sconv, {extensions: "fencedCodeBlocks"});
       });
 
@@ -156,6 +178,12 @@ describe("Markdown.Extra", function() {
         var escapedTable = "h1 \\| h2 \\| h3\n:- | :-: | -:\n1 | 2 | 3";
         var html = sconv.makeHtml(escapedTable);
         expect(html).not.toMatch(/table/);
+      });
+
+      it('should convert inline data in table', function() {
+        var html = sconv.makeHtml(tableComplex);
+        expect(html).toMatch(/<code>/);
+        expect(html).not.toMatch(/<h2>/);
       });
 
       /*

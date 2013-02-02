@@ -3,7 +3,7 @@
 This is a collection of [Pagedown][2] plugins to enable support for 
 Markdown Extra syntax. Open `demo/demo.html` to try it yourself.
 To run the tests, just open `spec/SpecRunner.html` in your browser. Or, to
-run a browser-less test from the command line, run `bundle install` followed
+run a browser-less test from the command line as travis-ci would, run `bundle install` followed
 by `bundle exec rake`. You'll need Ruby and the rake gem if you use
 the second method.
 
@@ -28,8 +28,8 @@ Otherwise, you can choose from the extensions currently supported:
 ```javascript
 // ascii tables
 Markdown.Extra.init(converter, {extensions: "tables"});
-// fenced code blocks 
-Markdown.Extra.init(converter, {extensions: "fencedCodeBlocks"});
+// gfm fenced code blocks 
+Markdown.Extra.init(converter, {extensions: "fenced_code_gfm"});
 ```
 
 If you're using multiple converters on the same page, you can just call
@@ -56,15 +56,12 @@ Which will render to something like this depending on how you choose to style it
 | Pipe      |    $1 |234  |
 
 You can also specify a class for the generated tables using
-`Markdown.Extra.init(converter, {tableClass: "table table-striped"})` for instance.
+`Markdown.Extra.init(converter, {table_class: "table table-striped"})` for instance.
 
 Within markdown tables, markdown inside of table cells will also be converted. By
 default a sanitizing converter is used, but you can change this by adding `sanitize: false`
 to the options object passed to `init`. Only span-level tags are retained
 inside of table cells, per the PHP Markdown Extra spec.
-
-See PHP Markdown Extra's [documentation][1] for a more complete overview
-of table syntax.
 
 ### Fenced Code Blocks
 
@@ -82,7 +79,8 @@ Will be transformed into:
 </pre>
 ```
 
-You can specify a syntax highlighter in the options object passed to `Markdown.Extra.init`.
+You can specify a syntax highlighter in the options object passed to `Markdown.Extra.init`,
+in which case the html generated from fenced code blocks will be compatible with it.
 Both [google-code-prettify][3] and [Highlight.js][4] are currently supported:
 
 ```javascript
@@ -107,6 +105,33 @@ Would generate the following html:
     <code class="language-javascript">var x = 2;</code>
 </pre>
 ```
+##Extension / Option Reference
+You can enable all of the currently supported extensions with `{extensions: "all"}`. This is also
+the default. If specifying multiple extensions, you must provide them as an array. Here
+is a list of the current and planned options and extensions. I've chosen to use the 
+same naming scheme as the excellent Python Markdown library.
+
+| Extension       | Description |
+| --------------- | ----------- |
+| fenced_code_gfm | GFM fenced code blocks |
+| tables          | Pretty tables! |
+| *def_list*      | Definition lists |
+| *attr_list*     | Special attributes list for headers and fenced code blocks |
+| *fenced_code*   | PHP Markdown Extra fenced code blocks |
+| *smart_strong*  | No strong emphasis in the middle of words |
+
+| Option          | Description |
+| --------------- | ----------- |
+| table_class     | Class added to all markdown tables. Useful when using frameworks like bootstrap. |
+| highlighter     | Code highlighter. Must be one of `highlight` and `prettify` for now |
+| sanitize        | Whether to sanitize inline html (in generated tables, for instance). Defaults to true. |
+
+*Italicized are planned, and will be added in roughly the order shown*
+
+See PHP Markdown Extra's [documentation][1] for a more complete overview
+of syntax. In situations where it differs from how things are done on GitHub --
+alignment of table headers, for instance -- I've chosen compatibility with gfm, which
+seems to be quickly becoming the most widely used markdown implementation.
 
 ##License
 

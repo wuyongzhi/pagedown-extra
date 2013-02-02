@@ -65,7 +65,7 @@
     } else {
       if (options.extensions.indexOf("tables") != -1)
         transformations.push("tables");
-      else if (contains(options.extensions, "fencedCodeBlocks"))
+      else if (contains(options.extensions, "fenced_code_gfm"))
         transformations.push("fencedCodeBlocks");
     }
 
@@ -82,8 +82,8 @@
       extra.highlightJs = options.highlighter === 'highlight';
     }
 
-    if ("tableClass" in options) {
-      extra.tableClass = options.tableClass;
+    if ("table_class" in options) {
+      extra.tableClass = options.table_class;
     }
 
     // we can't just use the same converter that the user passes in, as

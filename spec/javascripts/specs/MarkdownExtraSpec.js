@@ -65,7 +65,7 @@ describe("Markdown.Extra", function() {
     });
 
     it("should use 'fencedCodeBlocks' extension if specified", function() {
-      var extra = Markdown.Extra.init(converter, {extensions: "fencedCodeBlocks"});
+      var extra = Markdown.Extra.init(converter, {extensions: "fenced_code_gfm"});
       spyOn(extra, "tables").andCallThrough();
       spyOn(extra, "fencedCodeBlocks").andCallThrough();
       converter.makeHtml(markdown);
@@ -74,7 +74,7 @@ describe("Markdown.Extra", function() {
     });
 
     it("should apply table class if specified", function() {
-      Markdown.Extra.init(converter, {tableClass: "table-striped"});
+      Markdown.Extra.init(converter, {table_class: "table-striped"});
       var html = converter.makeHtml(table);
       expect(html).toMatch(/<table class="table-striped">/);
     });
@@ -116,7 +116,7 @@ describe("Markdown.Extra", function() {
     describe("with fenced code blocks", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();
-        Markdown.Extra.init(sconv, {extensions: "fencedCodeBlocks"});
+        Markdown.Extra.init(sconv, {extensions: "fenced_code_gfm"});
       });
 
       it("should convert code blocks correctly", function() {
@@ -235,7 +235,7 @@ describe("Markdown.Extra", function() {
 
     it("should not interfere with one another", function() {
       Markdown.Extra.init(conv1, {extensions: "tables"});
-      Markdown.Extra.init(conv2, {extensions: "fencedCodeBlocks"});
+      Markdown.Extra.init(conv2, {extensions: "fenced_code_gfm"});
       var testData = table + '\n\n' + codeBlock;
       var html1 = conv1.makeHtml(testData);
       var html2 = conv2.makeHtml(testData);

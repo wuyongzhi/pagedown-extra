@@ -37,7 +37,7 @@
           return extra.tables(text);
         });
       }
-      if (options.extensions.indexOf("fencedCodeBlocks") != -1) {
+      if (options.extensions.indexOf("fenced_code_gfm") != -1) {
         converter.hooks.chain("preConversion", function(text) {
           return extra.fencedCodeBlocks(text);
         });
@@ -53,8 +53,8 @@
       extra.highlightJs = options.highlighter === 'highlight';
     }
 
-    if (typeof options.tableClass != "undefined") {
-      extra.tableClass = options.tableClass;
+    if (typeof options.table_class != "undefined") {
+      extra.tableClass = options.table_class;
     }
 
     // we can't just use the same converter that the user passes in, as

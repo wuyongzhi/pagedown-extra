@@ -1,18 +1,27 @@
 describe("Markdown.Extra", function() {
   // basic code block
-  var codeBlock = "```foolang\nfoo=bar;\n```\n";
+  var codeBlock = "```foolang\nfoo=bar;\n```";
   // expected code block html
-  var codeBlockHtml ="<pre><code>foo=bar;\n</code></pre>";
+  var codeBlockHtml ='<pre><code class="foolang">foo=bar;</code></pre>';
 
   // basic table
   var table = "h1 | h2 | h3\n:- | :-: | -:\n1 | 2 | 3";
   var tableVerbose = "| h1 | h2 | h3 |\n| :- | :-: | -: |\n| 1 | 2 | 3 |";
   // expected table html
-  var tableHtml ='<table class="wmd-table">' +
-    '<tr><th>h1</th><th>h2</th><th>h3</th></tr>' +
-    '<tr><td style="text-align:left;">1</td>' +
-    '<td style="text-align:center;">2</td>' +
-    '<td style="text-align:right;">3</td></tr></table>';
+  var tableHtml ='<table class="wmd-table">\n' +
+    '<thead>\n' +
+    '<tr>\n' +
+    '  <th style="text-align:left;">h1</th>\n' +
+    '  <th style="text-align:center;">h2</th>\n' +
+    '  <th style="text-align:right;">h3</th>\n' +
+    '</tr>\n' +
+    '</thead>\n' +
+    '<tr>\n' +
+    '  <td style="text-align:left;">1</td>\n' +
+    '  <td style="text-align:center;">2</td>\n' +
+    '  <td style="text-align:right;">3</td>\n' +
+    '</tr>\n' +
+    '</table>';
 
   // table containing inline and block-level tags and markdown
   var tableComplex = "h1|h2|h3\n-|-|-\n`code`|##hdr##|<script></script>";
@@ -49,33 +58,37 @@ describe("Markdown.Extra", function() {
     it("should use 'tables' extension if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "tables"});
       spyOn(extra, "tables").andCallThrough();
+      spyOn(extra, "fencedCodeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.tables).toHaveBeenCalled();
+      expect(extra.fencedCodeBlocks).wasNotCalled();
     });
 
     it("should use 'fencedCodeBlocks' extension if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "fencedCodeBlocks"});
+      spyOn(extra, "tables").andCallThrough();
       spyOn(extra, "fencedCodeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.fencedCodeBlocks).toHaveBeenCalled();
+      expect(extra.tables).wasNotCalled();
     });
 
     it("should apply table class if specified", function() {
       Markdown.Extra.init(converter, {tableClass: "table-striped"});
       var html = converter.makeHtml(table);
-      expect(html).toMatch(/^<table class="table-striped">/);
+      expect(html).toMatch(/<table class="table-striped">/);
     });
 
     it("should format code for highlight.js if specified", function() {
       Markdown.Extra.init(converter, {highlighter: "highlight"});
       var html = converter.makeHtml(codeBlock);
-      expect(html).toMatch(/^<pre><code class="language-foolang">/);
+      expect(html).toMatch(/<pre><code class="language-foolang">/);
     });
 
     it("should format code for prettify if specified", function() {
       Markdown.Extra.init(converter, {highlighter: "prettify"});
       var html = converter.makeHtml(codeBlock);
-      expect(html).toMatch(/^<pre class="prettyprint"><code class="language-foolang">/);
+      expect(html).toMatch(/<pre class="prettyprint"><code class="language-foolang">/);
     });
 
     it("should use sanitizing converter by default for markdown inside tables", function() {
@@ -95,7 +108,6 @@ describe("Markdown.Extra", function() {
       var html = converter.makeHtml(tableComplex);
       expect(html).toMatch(/<script>/);
     });
-
   });
 
   describe("when using the sanitizing converter", function() {
@@ -114,23 +126,29 @@ describe("Markdown.Extra", function() {
 
       it("should recognize code blocks at beginning of input", function() {
         var html = sconv.makeHtml(codeBlock + '\n\n' + markdown);
-        expect(html).toMatch(/<pre>/);
+        expect(html).toMatch(/<pre><code/);
+      });
+
+      it("should recognize code blocks at end of input", function() {
+        var html = sconv.makeHtml(markdown + '\n\n' + codeBlock);
+        expect(html).toMatch(/<pre><code/);
       });
 
       it("should recognize code blocks surrounded by blank lines", function() {
         var html = sconv.makeHtml('\n' + codeBlock + '\n');
-        expect(html).toMatch(/<pre>/);
+        expect(html).toMatch(/<pre><code/);
       });
 
-      // TODO: remove this requirement
-      it("should not recognize code blocks that aren't followed by a newline", function() {
-        var html = sconv.makeHtml('```foolang\nfoo=bar\n```');
-        expect(html).not.toMatch(/<pre>/);
+      it("should recognize consecutive code blocks (no blank line necessary)", function() {
+        var html = sconv.makeHtml(codeBlock + '\n' + codeBlock);
+        expect(html).toMatch(/<\/pre>[\s\S]*<pre>/);
       });
 
-      /*
-      it("should not recognize code blocks within block-level tags", function() { });
-      */
+      it("should not recognize code blocks within block-level tags", function() {
+        var html = sconv.makeHtml('<div>' + codeBlock + '</div>');
+        expect(html).not.toMatch(/<pre><code/);
+      });
+
     });
 
     describe("with tables", function() {
@@ -156,7 +174,7 @@ describe("Markdown.Extra", function() {
 
       it("should have correct number of columns", function() {
         var html = sconv.makeHtml(table);
-        var matches = html.match(/<th>/g);
+        var matches = html.match(/<\/th>/g);
         expect(matches.length).toEqual(3);
       });
 
@@ -174,10 +192,24 @@ describe("Markdown.Extra", function() {
         expect(html1).toEqual(html2);
       });
 
-      it('should not create tables if pipes are escaped', function() {
-        var escapedTable = "h1 \\| h2 \\| h3\n:- | :-: | -:\n1 | 2 | 3";
+      it('should not create tables if initial pipe is escaped', function() {
+        var escapedTable = "h1 \\| h2 | h3\n:- | :-: | -:\n1 | 2 | 3";
+        var escapedTable2 = "\\| h1 \\| h2 | h3\n\\| :- | :-: | -:\n\\| 1 | 2 | 3";
         var html = sconv.makeHtml(escapedTable);
+        var html2 = sconv.makeHtml(escapedTable2);
         expect(html).not.toMatch(/table/);
+        expect(html2).not.toMatch(/table/);
+      });
+
+      it('should search for table recursively in remainder of block if first line escaped', function() {
+        var escapedTable = "foo \\| bar | baz\n :- | - | -\n h1 | h2 | h3\n :- | :-: | -:\n 1 | 2 | 3";
+        var escapedTable2 = "\\| foo | bar | baz\n| :- | - | -\n| h1 | h2 | h3\n| :- | :-: | -:\n| 1 | 2 | 3";
+        var html = sconv.makeHtml(escapedTable);
+        var html2 = sconv.makeHtml(escapedTable2);
+        expect(html).not.toMatch(/foo<\/th>/);
+        expect(html).toMatch(/h1<\/th>/);
+        expect(html2).not.toMatch(/foo<\/th>/);
+        expect(html2).toMatch(/h1<\/th>/);
       });
 
       it('should convert inline data in table', function() {
@@ -186,9 +218,10 @@ describe("Markdown.Extra", function() {
         expect(html).not.toMatch(/<h2>/);
       });
 
-      /*
-      it("should not recognize tables within block-level tags", function() { });
-      */
+      it("should not recognize tables within block-level tags", function() {
+        var html = sconv.makeHtml('<div>' + tableHtml + '</div>');
+        expect(html).not.toMatch(/table/);
+      });
     });
   });
 
@@ -213,5 +246,4 @@ describe("Markdown.Extra", function() {
       expect(html2).toMatch(/pre/);
     });
   });
-
 });

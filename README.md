@@ -63,7 +63,8 @@ default a sanitizing converter is used, but you can change this by adding `sanit
 to the options object passed to `init`. Only span-level tags are retained
 inside of table cells, per the PHP Markdown Extra spec.
 
-See PHP Markdown Extra's [documentation][1] for a more complete overview
+You can prevent a line of text from being interpreted as a table row element by escaping
+the first pipe on the row. See PHP Markdown Extra's [documentation][1] for a more complete overview
 of table syntax.
 
 ### Fenced Code Blocks
@@ -91,9 +92,10 @@ Markdown.Extra.init(converter, {highlighter: "prettify"});
 ```
 
 If either of those is specified, the language type will be added to the code tag, e.g.
-`<code class="language-javascript">`. If `prettify` is specified, `<pre>` also becomes
-`<pre class="prettyprint">`. Otherwise, the markup is the same as what Pagedown
-produces for regular indented code blocks.  For example, when using
+`<code class="language-javascript">`, otherwise you just get the standard 
+`<code class="javascript">` as in PHP Markdown Extra. If `prettify` is specified,
+`<pre>` also becomes `<pre class="prettyprint">`. Otherwise, the markup is the
+same as what Pagedown produces for regular indented code blocks.  For example, when using
 `{highlighter: "prettify"}` as shown above, this:
 
     ```javascript

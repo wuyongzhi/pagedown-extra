@@ -1,75 +1,10 @@
 (function () {
-  Markdown.Extra = function() {
 
-    // For converting internal markdown (in tables for instance).
-    // This is necessary since these methods are meant to be called as
-    // preConversion hooks, and the Markdown converter passed to init()
-    // won't convert any markdown contained in the html tags we return.
-    this.converter = null;
+  /******************************************************************
+   * Utility Functions                                              *
+   *****************************************************************/
 
-    // Stores html blocks we generate in preConversion hooks so that
-    // they're not destroyed if the user is using a sanitizing converter
-    this.hashBlocks = [];
-
-    // Fenced code block options
-    this.googleCodePrettify = false;
-    this.highlightJs = false;
-
-    // Table options
-    this.tableClass = 'wmd-table';
-  };
-
-
-  Markdown.Extra.init = function(converter, options) {
-    // Each call to init creates a new instance of Markdown.Extra so it's
-    // safe to have multiple converters on a single page
-    var extra = new Markdown.Extra();
-
-    options = options || {};
-    options.extensions = options.extensions || [];
-    if (options.extensions.length === 0 || options.extensions.indexOf("all") != -1) {
-      converter.hooks.chain("preConversion", function(text) {
-        return extra.all(text);
-      });
-    } else {
-      if (options.extensions.indexOf("tables") != -1) {
-        converter.hooks.chain("preConversion", function(text) {
-          return extra.tables(text);
-        });
-      }
-      if (options.extensions.indexOf("fencedCodeBlocks") != -1) {
-        converter.hooks.chain("preConversion", function(text) {
-          return extra.fencedCodeBlocks(text);
-        });
-      }
-    }
-
-    converter.hooks.chain("postConversion", function(text) {
-      return extra.unHashBlocks(text);
-    });
-
-    if (typeof options.highlighter != "undefined") {
-      extra.googleCodePrettify = options.highlighter === 'prettify';
-      extra.highlightJs = options.highlighter === 'highlight';
-    }
-
-    if (typeof options.tableClass != "undefined") {
-      extra.tableClass = options.tableClass;
-    }
-
-    // we can't just use the same converter that the user passes in, as
-    // Pagedown forbids it and will throw an exception if we do so
-    if (typeof options.sanitize == "undefined" || options.sanitize) {
-      extra.converter = Markdown.getSanitizingConverter(); // default
-    } else {
-      extra.converter = new Markdown.Converter();
-    }
-
-    // Caller usually won't need this, but it's handy for testing.
-    return extra;
-  };
-
-  function strip(str) {
+  function trim(str) {
     return str.replace(/^\s+|\s+$/g, '');
   }
 
@@ -91,22 +26,110 @@
     });
   }
 
-  // Replace `block` in `text` with a placeholder containing a key,
-  // where the key is the block's index in the hashBlocks array.
-  Markdown.Extra.prototype.hashBlock = function(text, block) {
-    var key = this.hashBlocks.push(block) - 1;
-    var rep = '<p>{{wmd-block-key=' + key + '}}</p>';
-    return text.replace(block, rep);
+
+  /******************************************************************
+   * Markdown.Extra                                                 *
+   *****************************************************************/
+
+  Markdown.Extra = function() {
+    // For converting internal markdown (in tables for instance).
+    // This is necessary since these methods are meant to be called as
+    // preConversion hooks, and the Markdown converter passed to init()
+    // won't convert any markdown contained in the html tags we return.
+    this.converter = null;
+
+    // Stores html blocks we generate in hooks so that
+    // they're not destroyed if the user is using a sanitizing converter
+    this.hashBlocks = [];
+
+    // Fenced code block options
+    this.googleCodePrettify = false;
+    this.highlightJs = false;
+
+    // Table options
+    this.tableClass = 'wmd-table';
+
+    this.tabWidth = 4;
+  };
+
+  Markdown.Extra.init = function(converter, options) {
+    // Each call to init creates a new instance of Markdown.Extra so it's
+    // safe to have multiple converters, with different options, on a single page
+    var extra = new Markdown.Extra();
+    var transformations = [];
+
+    options = options || {};
+    options.extensions = options.extensions || [];
+    if (options.extensions.length === 0 || contains(options.extensions, "all")) {
+        transformations.push("all");
+    } else {
+      if (options.extensions.indexOf("tables") != -1)
+        transformations.push("tables");
+      else if (contains(options.extensions, "fencedCodeBlocks"))
+        transformations.push("fencedCodeBlocks");
+    }
+
+    converter.hooks.chain("postNormalization", function(text) {
+      return extra.doConversion(transformations, text);
+    });
+
+    converter.hooks.chain("postConversion", function(text) {
+      return extra.finishConversion(text);
+    });
+
+    if ("highlighter" in options) {
+      extra.googleCodePrettify = options.highlighter === 'prettify';
+      extra.highlightJs = options.highlighter === 'highlight';
+    }
+
+    if ("tableClass" in options) {
+      extra.tableClass = options.tableClass;
+    }
+
+    // we can't just use the same converter that the user passes in, as
+    // Pagedown forbids it (doing so could cause an infinite loop)
+    if (!("sanitize" in options) || options.sanitize) {
+      extra.converter = Markdown.getSanitizingConverter(); // default
+    } else {
+      extra.converter = new Markdown.Converter();
+    }
+
+    // Caller usually won't need this, but it's handy for testing.
+    return extra;
+  };
+
+  // Setup state vars, do conversion
+  Markdown.Extra.prototype.doConversion = function(transformations, text) {
+    this.hashBlocks = [];
+
+    for(var i = 0; i < transformations.length; i++)
+      text = this[transformations[i]](text);
+
+    return text + '\n';
+  };
+
+  // Clear state vars that may use unnecessary memory. Unhash blocks we
+  // stored and return converted text.
+  Markdown.Extra.prototype.finishConversion = function(text) {
+    text = this.unHashExtraBlocks(text);
+    this.hashBlocks = [];
+    return text;
+  };
+
+  // Return a placeholder containing a key, which s the block's
+  // index in the hashBlocks array.
+  Markdown.Extra.prototype.hashExtraBlock = function(block) {
+    return '<p>~X' + (this.hashBlocks.push(block) - 1) + 'X</p>';
   };
 
   // Replace placeholder blocks in `text` with their corresponding
   // html blocks in the hashBlocks array.
-  Markdown.Extra.prototype.unHashBlocks = function(text) {
-    var re = new RegExp('<p>{{wmd-block-key=(\\d+)}}</p>', 'gm');
-    while(match = re.exec(text)) {
-      key = parseInt(match[1], 10);
-      text = text.replace(match[0], this.hashBlocks[key]);
-    }
+  Markdown.Extra.prototype.unHashExtraBlocks = function(text) {
+    var self = this;
+    text = text.replace(/<p>~X(\d+)X<\/p>/g, function(wholeMatch, m1) {
+      key = parseInt(m1, 10);
+      return self.hashBlocks[key];
+    });
     return text;
   };
 
@@ -115,158 +138,121 @@
     // Needed for post-processing step after calling convert.makeHtml()
     // to keep only span-level tags inside tables per the PHP Markdown Extra spec.
     var inlineTags = new RegExp(['^(<\\/?(a|abbr|acronym|applet|area|b|basefont|',
-                                'bdo|big|button|cite|code|del|dfn|em|figcaption|',
-                                'font|i|iframe|img|input|ins|kbd|label|map|',
-                                'mark|meter|object|param|progress|q|ruby|rp|rt|s|',
-                                'samp|script|select|small|span|strike|strong|',
-                                'sub|sup|textarea|time|tt|u|var|wbr)>|',
-                                '<(br)\\s?\\/?>)$'].join(''), 'i');
-    var that = this;
+                                 'bdo|big|button|cite|code|del|dfn|em|figcaption|',
+                                 'font|i|iframe|img|input|ins|kbd|label|map|',
+                                 'mark|meter|object|param|progress|q|ruby|rp|rt|s|',
+                                 'samp|script|select|small|span|strike|strong|',
+                                 'sub|sup|textarea|time|tt|u|var|wbr)>|',
+                                 '<(br)\\s?\\/?>)$'].join(''), 'i');
+    var self = this;
+
+    /*
+    var leadingPipe = new RegExp([
+                                   '^',  // Start of a line
+                                   '[ ]{0,' + (TAB_WIDTH - 1) + '}', // Allowed whitespace.
+                                   '[|]', // Optional leading pipe (present)
+                                   '(.+)\\n', // $1: Header row (at least one pipe)
+
+                                   '[ ]{0,' + (TAB_WIDTH - 1) + '}', // Allowed whitespace.
+                                   '[|] ([ ]*[-:]+[-| :]*)\\n', // $2: Header underline
+
+                                   '(', // $3: Cells  (PHP Markdown uses atomic capture. JS doesn't have it. Issues?)
+                                     '(',
+                                       '[ ]*', // Allowed whitespace.
+                                       '[|].*\n', // Row content.
+                                     ')*',
+                                   ')',
+                                   '(?=\\n|$)' // Stop at final double newline. (TODO: or end of file) Do we need this?
+                                 ].join(''), 'g');
+                                */
+
+    var leadingPipe = new RegExp("^[ ]{0,3}[|](.+)\\n[ ]{0,3}[|]([ ]*[-:]+[-| :]*)\\n((?:[ ]*[|].*\\n?)*)(?:\\n|$)", 'gm');
+    var noLeadingPipe = new RegExp("^[ ]{0,3}(\\S.*[|].*)\\n[ ]{0,3}([-:]+[ ]*[|][-| :]*)\\n((?:.*[|].*\\n?)*)(?:\\n|$)", 'gm');
+
+    text = text.replace(leadingPipe, doTable);
+    text = text.replace(noLeadingPipe, doTable);
 
     // Convert markdown within the table, retaining only span-level tags
     function convertInline(text) {
-      var html = that.converter.makeHtml(text);
+      var html = self.converter.makeHtml(text);
       return sanitizeHtml(html, inlineTags);
     }
 
-    // Split a row into columns
-    function splitRow(row, border) {
-      var r = strip(row);
-      // remove initial/final pipes if they exist
-      if (border) {
-        if (r.indexOf('|') === 0)
-          r = r.slice(1);
-        if (r.lastIndexOf('|') === r.length - 1)
-          r = r.slice(0, -1);
+    // $1 = header, $2 = separator, $3 = body
+    function doTable(match, header, separator, body, offset, string) {
+      // if first pipe is escaped, search remainder of match for table
+      var testNdx = header.indexOf('|');
+      if (testNdx > 0 && header[testNdx - 1] == '\\') {
+        var rest = separator + '\n' + body;
+        // any necessary hashing will be done inside the callbacks here
+        rest = rest.replace(leadingPipe, doTable);
+        rest = rest.replace(noLeadingPipe, doTable);
+        return header + '\n' + rest;
       }
 
-      var cols = r.split('|');
-      for (var i = 0; i < cols.length; i++)
-        cols[i] = strip(cols[i]);
+      // remove any leading pipes and whitespace
+      header = header.replace(/^ *[|]/m, '');
+      separator = separator.replace(/^ *[|]/m, '');
+      body = body.replace(/^ *[|]/gm, '');
 
-      return cols;
-    }
+      // remove trailing pipes and whitespace
+      header = header.replace(/[|] *$/m, '');
+      separator = separator.replace(/[|] *$/m, '');
+      body = body.replace(/[|] *$/gm, '');
 
-    // Convert a single row of a markdown table into html.
-    function buildRow(line, border, align, isHeader) {
-      var rowHtml = '<tr>';
-      var cols = splitRow(line, border);
-      var style, cellStart, cellEnd, content;
-
-      // Use align to ensure each row has same number of columns
-      for (var i = 0; i < align.length; i++) {
-        style = align[i] && !isHeader ? ' style="text-align:' + align[i] + ';"' : '';
-        cellStart = isHeader ? '<th'+style+'>' : '<td'+style+'>';
-        cellEnd = isHeader ? "</th>" : "</td>";
-        content = i < cols.length ? convertInline(cols[i]) : '';
-        rowHtml += cellStart + content + cellEnd;
+      // determine column alignments
+      alignspecs = separator.split(/ *[|] */);
+      align = [];
+      for (var i = 0; i < alignspecs.length; i++) {
+        var spec = alignspecs[i];
+        if (spec.match(/^ *-+: *$/m))
+          align[i] = ' style="text-align:right;"';
+        else if (spec.match(/^ *:-+: *$/m))
+          align[i] = ' style="text-align:center;"';
+        else if (spec.match(/^ *:-+ *$/m))
+          align[i] = ' style="text-align:left;"';
+        else align[i] = '';
       }
 
-      return rowHtml + "</tr>";
-    }
+      // TODO: parse spans in header and rows before splitting, so that pipes
+      // inside of tags are not interpreted as separators
+      var headers = header.split(/ *[|] */);
+      var colCount = headers.length;
 
-    function isTableRow(line, ndx) {
-      var pipes = line.match(/\|/g);
-      var escapedPipes = line.match(/\\\|/g);
-      var pCount = pipes === null ? 0 : pipes.length;
-      var epCount = escapedPipes === null ? 0 : escapedPipes.length;
-      // if all pipes are escaped, then we don't interpret it as a table row
-      if (pCount == epCount)
-        return false;
+      // build html
+      var cls = self.tableClass === '' ? '' : ' class="' + self.tableClass + '"';
+      var html = ['<table', cls, '>\n', '<thead>\n', '<tr>\n'].join('');
 
-      if (ndx == 1 && pCount > 0)
-        return contains(line, '-');
+      // build column headers.
+      for (i = 0; i < colCount; i++)
+        html += ["  <th", align[i], ">", convertInline(trim(headers[i])), "</th>\n"].join('');
+      html += "</tr>\n</thead>\n";
 
-      return pCount > 0;
-    }
+      // build rows
+      var rows = body.split('\n');
+      for (i = 0; i < rows.length; i++) {
+        if (rows[i].match(/^\s*$/)) // can apply to final row
+          continue;
 
-    // Find next block (group of lines matching our definition of a table) in `text`
-    function findNextBlock(text) {
-      var lines = text.split('\n');
-      var block = [], ndx = 0, bounds = {};
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        // TODO: ignore within gfm code blocks and all block-level tags
-        if (isTableRow(line, ndx)) {
-            if (typeof bounds.start == "undefined")
-              bounds.start = i;
-            block.push(line);
-            ndx++;
-        } else { // invalid line
-          if (block.length < 3) { // valid table needs head, sep, body
-            // reset and continue
-            block = [];
-            bounds = {};
-            ndx = 0;
-          } else {
-            break;
-          }
-        }
+        // ensure number of rowCells matches colCount
+        var rowCells = rows[i].split(/ *[|] */);
+        var lenDiff = colCount - rowCells.length;
+        for (var j = 0; j < lenDiff; j++)
+          rowCells.push('');
+
+        html += "<tr>\n";
+        for (j = 0; j < colCount; j++)
+          html += ["  <td", align[j], ">", convertInline(trim(rowCells[j])), "</td>\n"].join('');
+        html += "</tr>\n";
       }
 
-      // this is outside the for loop b/c it's possble that we
-      // never ran into an invalid line -- i.e. block ends at end of text
-      if (block.length >= 3) {
-          bounds.end = bounds.start + block.length;
-          return {block: block, bounds: bounds, lines: lines};
-      }
+      html += "</table>\n";
 
-      return null;
+      // replace html with placeholder until postConversion step
+      return self.hashExtraBlock(html);
     }
 
-    function makeTables(text) {
-      var blockdata;
-      while ((blockdata = findNextBlock(text)) !== null) {
-        var block = blockdata.block,
-            bounds = blockdata.bounds,
-            lines = blockdata.lines,
-            header = strip(block[0]),
-            sep = strip(block[1]),
-            border = false;
-
-        if (header.indexOf('|') === 0 ||
-            header.lastIndexOf('|') === header.length-1)
-          border = true;
-
-        var align = [],
-            cols = splitRow(sep, border);
-
-        // determine alignment of columns
-        for (var j = 0; j < cols.length; j++) {
-          var c = cols[j];
-          if (c.indexOf(':') === 0 && c.lastIndexOf(':') == c.length - 1)
-            align.push('center');
-          else if (c.indexOf(':') === 0)
-            align.push('left');
-          else if (c.lastIndexOf(':') === c.length - 1)
-            align.push('right');
-          else
-            align.push(null);
-        }
-
-        // build html.
-        var cls = that.tableClass === '' ? '' :
-          ' class="' + that.tableClass + '"';
-        var head = buildRow(block[0], border, align, true);
-
-        var tableHtml = ['<table', cls, '>', head].join('');
-        for (j = 2; j < block.length; j++)
-          tableHtml += buildRow(block[j], border, align, false);
-        tableHtml += "</table>\n";
-
-        // replace table markdown with html
-        var toRemove = bounds.end - bounds.start + 1;
-        lines.splice(bounds.start, toRemove, tableHtml);
-
-        // replace html with placeholder until postConversion step
-        text = lines.join('\n');
-        text = that.hashBlock(text, tableHtml);
-      }
-
-      return text;
-    }
-
-    return makeTables(text);
+    return text;
   };
 
   // Find and convert gfm-inspired fenced code blocks into html.
@@ -278,32 +264,28 @@
       return code;
     }
 
-    // TODO: ignore within block-level tags
-    var re = new RegExp(
-      '(\\n\\n|^\\n?)' +      // separator, $1 = leading whitespace
-      '^```(\\w+)?\\s*\\n' +  // opening fence, $2 = optional lang
-      '([\\s\\S]*?)' +        // $3 = code block content (no dotAll in js - dot doesn't match newline)
-      '^```\\s*\\n',          // closing fence
-      'gm'                    // Flags : global, multiline
-    );
+    var self = this;
+    text = text.replace(/(?:^|\n)```(.*)\n([\s\S]*?)\n```/g, function(match, m1, m2) {
+      var language = m1, codeblock = m2;
 
-    var match;
-    while (match = re.exec(text)) {
-      var preclass = this.googleCodePrettify ? ' class="prettyprint"' : '';
+      // adhere to specified options
+      var preclass = self.googleCodePrettify ? ' class="prettyprint"' : '';
       var codeclass = '';
-      if (typeof match[2] != "undefined" && (this.googleCodePrettify || this.highlightJs))
-        codeclass = ' class="language-' + match[2] + '"';
-      var codeblock = '<pre' + preclass + '><code' + codeclass + '>';
-      codeblock += encodeCode(match[3]) + '</code></pre>';
+      if (language) {
+        if (self.googleCodePrettify || self.highlightJs) {
+          // use html5 language- class names. supported by both prettify and highlight.js
+          codeclass = ' class="language-' + language + '"';
+        } else {
+          codeclass = ' class="' + language + '"';
+        }
+      }
 
-      // replace markdwon with generated html code block
-      var first = text.substring(0, match.index) + '\n\n';
-      var last = '\n\n' + text.substr(match.index + match[0].length);
-      text = first + codeblock + last;
+      var html = ['<pre', preclass, '><code', codeclass, '>',
+                  encodeCode(codeblock), '</code></pre>'].join('');
 
       // replace codeblock with placeholder until postConversion step
-      text = this.hashBlock(text, codeblock);
-    }
+      return self.hashExtraBlock(html);
+    });
 
     return text;
   };

@@ -66,9 +66,6 @@ default a sanitizing converter is used, but you can change this by adding `sanit
 to the options object passed to `init`. Only span-level tags are retained
 inside of table cells, per the PHP Markdown Extra spec.
 
-See PHP Markdown Extra's [documentation][1] for a more complete overview
-of table syntax.
-
 ### Fenced Code Blocks
 
 Fenced code blocks are supported &agrave; la GitHub. This markdown:

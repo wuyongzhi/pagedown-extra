@@ -140,7 +140,7 @@
 
 
   /******************************************************************
-   * Markdown.Extra                                                 *
+   * Tables                                                         *
    *****************************************************************/
 
   // Find and convert Markdown Extra tables into html.
@@ -268,7 +268,7 @@
 
 
   /******************************************************************
-   * Markdown.Extra                                                 *
+   * Fenced Code Blocks  (gfm)                                      *
    *****************************************************************/
 
   // Find and convert gfm-inspired fenced code blocks into html.

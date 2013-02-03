@@ -12,18 +12,20 @@
     return str.indexOf(substr) != -1;
   }
 
-  // Returns the tag if it matches the whitelist, else return empty string
-  function sanitizeTag(tag, whitelist) {
-    if (tag.match(whitelist))
-      return tag;
-    return '';
-  }
-
   // Sanitizes html, removing tags that aren't in the whitelist
   function sanitizeHtml(html, whitelist) {
-    return html.replace(/<[^>]*>?/gi, function(match) {
-      return sanitizeTag(match, whitelist);
+    return html.replace(/<[^>]*>?/gi, function(tag) {
+      return tag.match(whitelist) ? tag : '';
     });
+  }
+
+  // Converte escpaed special characters to HTLM decimal entity codes.
+  function processEscapes(text) {
+    // Markdown extra adds two escapable characters, `:` and `|`
+    // If escaped, we convert them to html entities so our
+    // regexes don't recognize them. Markdown doesn't support escaping
+    // the escape character, e.g. `\\`, which make this even simpler.
+    return text.replace(/\\\|/g, '&#124;').replace(/\\:/g, '&#58;');
   }
 
 
@@ -47,7 +49,7 @@
     this.highlightJs = false;
 
     // Table options
-    this.tableClass = 'wmd-table';
+    this.tableClass = '';
 
     this.tabWidth = 4;
   };
@@ -59,11 +61,11 @@
     var transformations = [];
 
     options = options || {};
-    options.extensions = options.extensions || [];
-    if (options.extensions.length === 0 || contains(options.extensions, "all")) {
-        transformations.push("all");
+    options.extensions = options.extensions || ["all"];
+    if (contains(options.extensions, "all")) {
+      transformations.push("all");
     } else {
-      if (options.extensions.indexOf("tables") != -1)
+      if (contains(options.extensions, "tables"))
         transformations.push("tables");
       else if (contains(options.extensions, "fenced_code_gfm"))
         transformations.push("fencedCodeBlocks");
@@ -102,6 +104,7 @@
   Markdown.Extra.prototype.doConversion = function(transformations, text) {
     this.hashBlocks = [];
 
+    text = processEscapes(text);
     for(var i = 0; i < transformations.length; i++)
       text = this[transformations[i]](text);
 
@@ -116,8 +119,8 @@
     return text;
   };
 
-  // Return a placeholder containing a key, which s the block's
-  // index in the hashBlocks array.
+  // Return a placeholder containing a key, which is the block's index in the
+  // hashBlocks array. We wrap our output in a <p> tag here so Pagedown won't.
   Markdown.Extra.prototype.hashExtraBlock = function(block) {
     return '<p>~X' + (this.hashBlocks.push(block) - 1) + 'X</p>';
   };
@@ -133,6 +136,11 @@
     return text;
   };
 
+
+  /******************************************************************
+   * Markdown.Extra                                                 *
+   *****************************************************************/
+
   // Find and convert Markdown Extra tables into html.
   Markdown.Extra.prototype.tables = function(text) {
     // Needed for post-processing step after calling convert.makeHtml()
@@ -147,24 +155,35 @@
     var self = this;
 
     /*
-    var leadingPipe = new RegExp([
-                                   '^',  // Start of a line
-                                   '[ ]{0,' + (TAB_WIDTH - 1) + '}', // Allowed whitespace.
-                                   '[|]', // Optional leading pipe (present)
-                                   '(.+)\\n', // $1: Header row (at least one pipe)
+    var leadingPipe = new RegExp(['^',
+                                  '[ ]{0,3}', // Allowed whitespace
+                                  '[|]',      // Initial pipe
+                                  '(.+)\\n',  // $1: Header Row
 
-                                   '[ ]{0,' + (TAB_WIDTH - 1) + '}', // Allowed whitespace.
-                                   '[|] ([ ]*[-:]+[-| :]*)\\n', // $2: Header underline
+                                  '[ ]{0,3}',                 // Allowed whitespace
+                                  '[|]([ ]*[-:]+[-| :]*)\\n', // $2: Separator
 
-                                   '(', // $3: Cells  (PHP Markdown uses atomic capture. JS doesn't have it. Issues?)
-                                     '(',
-                                       '[ ]*', // Allowed whitespace.
-                                       '[|].*\n', // Row content.
-                                     ')*',
-                                   ')',
-                                   '(?=\\n|$)' // Stop at final double newline. (TODO: or end of file) Do we need this?
-                                 ].join(''), 'g');
-                                */
+                                  '(',                    // $3: Table Body
+                                    '(?:[ ]*[|].*\\n?)*', // Table rows
+                                  ')',
+                                  '(?:\\n|$)'             // Stop at final newline
+                                 ].join(''),
+                                 'gm');
+
+    var noLeadingPipe = new RegExp(['^',
+                                    '[ ]{0,3}',        // Allowed whitespace
+                                    '(\\S.*[|].*)\\n', // $1: Header Row
+
+                                    '[ ]{0,3}',                  // Allowed whitespace
+                                    '([-:]+[ ]*[|][-| :]*)\\n', // $2: Separator
+
+                                    '(',                  // $3: Table Body
+                                      '(?:.*[|].*\\n?)*', // Table rows
+                                    ')',
+                                    '(?:\\n|$)'           // Stop at final newline
+                                   ].join(''),
+                                   'gm');
+    */
 
     var leadingPipe = new RegExp("^[ ]{0,3}[|](.+)\\n[ ]{0,3}[|]([ ]*[-:]+[-| :]*)\\n((?:[ ]*[|].*\\n?)*)(?:\\n|$)", 'gm');
     var noLeadingPipe = new RegExp("^[ ]{0,3}(\\S.*[|].*)\\n[ ]{0,3}([-:]+[ ]*[|][-| :]*)\\n((?:.*[|].*\\n?)*)(?:\\n|$)", 'gm');
@@ -180,16 +199,6 @@
 
     // $1 = header, $2 = separator, $3 = body
     function doTable(match, header, separator, body, offset, string) {
-      // if first pipe is escaped, search remainder of match for table
-      var testNdx = header.indexOf('|');
-      if (testNdx > 0 && header[testNdx - 1] == '\\') {
-        var rest = separator + '\n' + body;
-        // any necessary hashing will be done inside the callbacks here
-        rest = rest.replace(leadingPipe, doTable);
-        rest = rest.replace(noLeadingPipe, doTable);
-        return header + '\n' + rest;
-      }
-
       // remove any leading pipes and whitespace
       header = header.replace(/^ *[|]/m, '');
       separator = separator.replace(/^ *[|]/m, '');
@@ -220,7 +229,7 @@
       var colCount = headers.length;
 
       // build html
-      var cls = self.tableClass === '' ? '' : ' class="' + self.tableClass + '"';
+      var cls = self.tableClass ? ' class="' + self.tableClass + '"' : '';
       var html = ['<table', cls, '>\n', '<thead>\n', '<tr>\n'].join('');
 
       // build column headers.
@@ -254,6 +263,11 @@
 
     return text;
   };
+
+
+  /******************************************************************
+   * Markdown.Extra                                                 *
+   *****************************************************************/
 
   // Find and convert gfm-inspired fenced code blocks into html.
   Markdown.Extra.prototype.fencedCodeBlocks = function(text) {

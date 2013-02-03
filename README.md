@@ -110,6 +110,13 @@ Would generate the following html:
 </pre>
 ```
 
+### Special Characters
+
+Markdown Extra adds two new special characters, `|` and `:`, that can be escaped
+by preceding them with `\`. Doing so will cause them to be ignored when determining
+the extent of code blocks and definition lists.
+
+
 ##License
 
 MIT: http://justinm.mit-license.org

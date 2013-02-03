@@ -8,7 +8,7 @@ describe("Markdown.Extra", function() {
   var table = "h1 | h2 | h3\n:- | :-: | -:\n1 | 2 | 3";
   var tableVerbose = "| h1 | h2 | h3 |\n| :- | :-: | -: |\n| 1 | 2 | 3 |";
   // expected table html
-  var tableHtml ='<table class="wmd-table">\n' +
+  var tableHtml ='<table>\n' +
     '<thead>\n' +
     '<tr>\n' +
     '  <th style="text-align:left;">h1</th>\n' +
@@ -192,18 +192,18 @@ describe("Markdown.Extra", function() {
         expect(html1).toEqual(html2);
       });
 
-      it('should not create tables if initial pipe is escaped', function() {
-        var escapedTable = "h1 \\| h2 | h3\n:- | :-: | -:\n1 | 2 | 3";
-        var escapedTable2 = "\\| h1 \\| h2 | h3\n\\| :- | :-: | -:\n\\| 1 | 2 | 3";
+      it('should not create tables if properly escaped', function() {
+        var escapedTable = "h1 \\| h2 \\| h3\n:- | :-: | -:\n1 | 2 | 3";
+        var escapedTable2 = "\\| h1 \\| h2 \\| h3\n\\| :- | :-: | -:\n\\| 1 | 2 | 3";
         var html = sconv.makeHtml(escapedTable);
         var html2 = sconv.makeHtml(escapedTable2);
         expect(html).not.toMatch(/table/);
         expect(html2).not.toMatch(/table/);
       });
 
-      it('should search for table recursively in remainder of block if first line escaped', function() {
-        var escapedTable = "foo \\| bar | baz\n :- | - | -\n h1 | h2 | h3\n :- | :-: | -:\n 1 | 2 | 3";
-        var escapedTable2 = "\\| foo | bar | baz\n| :- | - | -\n| h1 | h2 | h3\n| :- | :-: | -:\n| 1 | 2 | 3";
+      it('should find tables following escaped rows', function() {
+        var escapedTable = "foo \\| bar \\| baz\n :- | - | -\n h1 | h2 | h3\n :- | :-: | -:\n 1 | 2 | 3";
+        var escapedTable2 = "\\| foo \\| bar \\| baz\n| :- | - | -\n| h1 | h2 | h3\n| :- | :-: | -:\n| 1 | 2 | 3";
         var html = sconv.makeHtml(escapedTable);
         var html2 = sconv.makeHtml(escapedTable2);
         expect(html).not.toMatch(/foo<\/th>/);
@@ -212,7 +212,7 @@ describe("Markdown.Extra", function() {
         expect(html2).toMatch(/h1<\/th>/);
       });
 
-      it('should convert inline data in table', function() {
+      it('should convert inline data in tables', function() {
         var html = sconv.makeHtml(tableComplex);
         expect(html).toMatch(/<code>/);
         expect(html).not.toMatch(/<h2>/);

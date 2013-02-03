@@ -71,7 +71,9 @@
         transformations.push("fencedCodeBlocks");
     }
 
-    converter.hooks.chain("postNormalization", function(text) {
+    // preBlockGamut also gives us access to a hook so we can run the
+    // block gamut recursively, however we don't need it at this point
+    converter.hooks.chain("preBlockGamut", function(text) {
       return extra.doConversion(transformations, text);
     });
 

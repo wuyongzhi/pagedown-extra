@@ -13,6 +13,9 @@ These extensions work equally well with both the default and sanitizing converte
 
 ## Usage
 
+First, make sure you have the most recent version of Pagedown (as of Feb 3, 2013),
+as it adds more powerful hooks that this implementation relies on.
+
 In order to use the extensions, you'll need to include
 `Markdown.Extra.js` after the Pagedown sources. Check out the
 demo for a working example.

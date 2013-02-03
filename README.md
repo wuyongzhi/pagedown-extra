@@ -13,6 +13,9 @@ These extensions work equally well with both the default and sanitizing converte
 
 ## Usage
 
+First, make sure you have the most recent version of Pagedown (as of Feb 3, 2013),
+as it adds more powerful hooks that this implementation relies on.
+
 In order to use the extensions, you'll need to include
 `Markdown.Extra.js` after the Pagedown sources. Check out the
 demo for a working example.
@@ -63,6 +66,9 @@ default a sanitizing converter is used, but you can change this by adding `sanit
 to the options object passed to `init`. Only span-level tags are retained
 inside of table cells, per the PHP Markdown Extra spec.
 
+See PHP Markdown Extra's [documentation][1] for a more complete overview
+of table syntax.
+
 ### Fenced Code Blocks
 
 Fenced code blocks are supported &agrave; la GitHub. This markdown:
@@ -89,9 +95,10 @@ Markdown.Extra.init(converter, {highlighter: "prettify"});
 ```
 
 If either of those is specified, the language type will be added to the code tag, e.g.
-`<code class="language-javascript">`. If `prettify` is specified, `<pre>` also becomes
-`<pre class="prettyprint">`. Otherwise, the markup is the same as what Pagedown
-produces for regular indented code blocks.  For example, when using
+`<code class="language-javascript">`, otherwise you just get the standard 
+`<code class="javascript">` as in PHP Markdown Extra. If `prettify` is specified,
+`<pre>` also becomes `<pre class="prettyprint">`. Otherwise, the markup is the
+same as what Pagedown produces for regular indented code blocks.  For example, when using
 `{highlighter: "prettify"}` as shown above, this:
 
     ```javascript
@@ -132,6 +139,13 @@ See PHP Markdown Extra's [documentation][1] for a more complete overview
 of syntax. In situations where it differs from how things are done on GitHub --
 alignment of table headers, for instance -- I've chosen compatibility with gfm, which
 seems to be quickly becoming the most widely used markdown implementation.
+
+### Special Characters
+
+Markdown Extra adds two new special characters, `|` and `:`, that can be escaped
+by preceding them with `\`. Doing so will cause them to be ignored when determining
+the extent of code blocks and definition lists.
+
 
 ##License
 

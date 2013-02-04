@@ -22,9 +22,11 @@ describe("Markdown.Extra", function() {
     '  <td style="text-align:right;">3</td>\n' +
     '</tr>\n' +
     '</table>';
-
   // table containing inline and block-level tags and markdown
   var tableComplex = "h1|h2|h3\n-|-|-\n`code`|##hdr##|<script></script>";
+
+  var defList = "Term 1\nTerm 2\n:   Def1";
+  var defListHtml = "<dl>\n<dt>Term 1</dt>\n<dt>Term 2</dt>\n<dd>Def1</dd>\n</dl>";
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
@@ -62,6 +64,13 @@ describe("Markdown.Extra", function() {
       converter.makeHtml(markdown);
       expect(extra.tables).toHaveBeenCalled();
       expect(extra.fencedCodeBlocks).wasNotCalled();
+    });
+
+    it("should use 'def_list' extension if specified", function() {
+      var extra = Markdown.Extra.init(converter, {extensions: "def_list"});
+      spyOn(extra, "definitionLists").andCallThrough();
+      converter.makeHtml(markdown);
+      expect(extra.definitionLists).toHaveBeenCalled();
     });
 
     it("should use 'fencedCodeBlocks' extension if specified", function() {
@@ -221,6 +230,48 @@ describe("Markdown.Extra", function() {
       it("should not recognize tables within block-level tags", function() {
         var html = sconv.makeHtml('<div>' + tableHtml + '</div>');
         expect(html).not.toMatch(/table/);
+      });
+    });
+
+    describe("with definition lists", function() {
+      beforeEach(function() {
+        sconv = Markdown.getSanitizingConverter();
+        Markdown.Extra.init(sconv, {extensions: "def_list"});
+      });
+
+      it("should convert definition lists properly", function() {
+        var html = strip(sconv.makeHtml(defList));
+        expect(html).toEqual(defListHtml);
+      });
+
+      it("should wrap <dt> contents with <p> if preceded by a blank line", function() {
+        var defList = "Term 1\nTerm 2\n\n:   Def1";
+        var html = sconv.makeHtml(defList);
+        expect(html).toMatch(/<p>Def1<\/p>/);
+      });
+
+      it("should not convert definition list if escaped", function() {
+        var defList = "Term 1\nTerm 2\n\\:   Def1";
+        var html = sconv.makeHtml(defList);
+        expect(html).not.toMatch(/<dl>/);
+      });
+
+      it("should convert inline elements in terms and definitions", function() {
+        var defList = "Term 1\nTerm 2 [link](http://www.foo.com)\n:   *foo*";
+        var html = sconv.makeHtml(defList);
+        expect(html).toMatch(/<a href[\s\S]*<em>/);
+      });
+
+      it("should convert block-level elements in definitions", function() {
+        var defList = "Term 2\n\n" +
+          ":   This definition has a code block, a blockquote and a list.\n\n" +
+          "        code block.\n\n" +
+          "    > block quote\n" +
+          "    > on two lines.\n\n" +
+          "    1.  first list item\n" +
+          "    2.  second list item\n\n";
+        var html = sconv.makeHtml(defList);
+        expect(html).toMatch(/<pre><code>[\s\S]*<blockquote>[\s\S]*<ol>/);
       });
     });
   });

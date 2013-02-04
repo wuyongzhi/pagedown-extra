@@ -38,7 +38,7 @@ Markdown.Extra.init(converter, {extensions: "fenced_code_gfm"});
 If you're using multiple converters on the same page, you can just call
 `Markdown.Extra.init` once for each converter and you're all set.
 
-### Tables
+### [Tables][5]
 
 Markdown.Extra supports ascii-formatted tables:
 
@@ -66,7 +66,7 @@ default a sanitizing converter is used, but you can change this by adding `sanit
 to the options object passed to `init`. Only span-level tags are retained
 inside of table cells, per the PHP Markdown Extra spec.
 
-### Fenced Code Blocks
+### [Fenced Code Blocks][6]
 
 Fenced code blocks are supported &agrave; la GitHub. This markdown:
 
@@ -109,7 +109,40 @@ Would generate the following html:
     <code class="language-javascript">var x = 2;</code>
 </pre>
 ```
-##Extension / Option Reference
+
+## [Definition Lists][7]
+
+```markdown
+Term 1
+:   Definition 1
+
+Term 2
+:   This definition has a code block.
+
+        code block
+
+```
+
+becomes:
+
+```html
+<dl>
+  <dt>Term 1</dt>
+  <dd>
+    Definition 1
+  </dd>
+  <dt>Term 2</dt>
+  <dd>
+    This definition has a code block.
+    <pre><code>code block</code></pre>
+  </dd>
+</dl>
+```
+
+Definitions can contain both inline and block-level markdown.
+
+
+## Extension / Option Reference
 You can enable all of the currently supported extensions with `{extensions: "all"}`. This is also
 the default. If specifying multiple extensions, you must provide them as an array. Here
 is a list of the current and planned options and extensions. I've chosen to use the 
@@ -152,4 +185,6 @@ MIT: http://justinm.mit-license.org
 [2]: http://code.google.com/p/pagedown/ "Pagedown - Google Code"
 [3]: http://code.google.com/p/google-code-prettify/ "Prettify"
 [4]: http://softwaremaniacs.org/soft/highlight/en/ "HighlightJs"
-
+[5]: http://michelf.ca/projects/php-markdown/extra/#table
+[6]: http://github.github.com/github-flavored-markdown/
+[7]: http://michelf.ca/projects/php-markdown/extra/#def-list

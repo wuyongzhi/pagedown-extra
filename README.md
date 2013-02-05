@@ -184,7 +184,7 @@ the extent of code blocks and definition lists.
 
 ##License
 
-MIT: http://justinm.mit-license.org
+See LICENSE.txt 
 
 [1]: http://michelf.ca/projects/php-markdown/extra/#table "Markdown Extra Table Documentation"
 [2]: http://code.google.com/p/pagedown/ "Pagedown - Google Code"

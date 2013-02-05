@@ -304,7 +304,7 @@ describe("Markdown.Extra", function() {
         Markdown.Extra.init(sconv);
       });
 
-      it("should correctly apply classes and ids to headers", function() {
+      it("should correctly apply attributes to headers", function() {
         var hdrBlock1 = "Hello There {#header-id .class1}\n=========\n";
         var hdrBlock2 = "## Hello There {#header-id .class1}\n";
         var hdrBlock3 = "## Hello There ##  {#header-id .class1}\n";
@@ -316,14 +316,20 @@ describe("Markdown.Extra", function() {
         expect(html3).toMatch(/<h2 id="header-id" class="class1">/);
       });
 
-      it("should correctly apply classes and ids to fenced code blocks", function() {
+      it("should correctly apply attributes to fenced code blocks", function() {
+        var text = "```\t{.test-class #test-id} \nfoo=bar;\n  var x;\n\n```\t\n";
+        var html = sconv.makeHtml(text);
+        expect(html).toMatch(/<pre id="test-id" class="test-class">/);
+      });
+
+      it("should correctly apply attributes to fenced code blocks with a specified language", function() {
         var text = "```foolang {.prettyprint .foo #awesome}\nfoo=bar;\n```";
         var html = sconv.makeHtml(text);
-        expect(html).toMatch(/<pre id="awesome" class="foo prettyprint">/);
+        expect(html).toMatch(/<pre id="awesome" class="prettyprint foo">/);
       });
 
       it("should merge classes with preexisting classes", function() {
-        var text = "```foolang {.test-class}\nfoo=bar;\n```";
+        var text = "```foolang  {.test-class .prettyprint} \n\n foo=bar; \n\n```";
         var converter = Markdown.getSanitizingConverter();
         Markdown.Extra.init(converter, {highlighter: "prettify"});
         var html = converter.makeHtml(text);

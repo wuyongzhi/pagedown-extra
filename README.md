@@ -7,8 +7,6 @@ run a browser-less test from the command line as travis-ci would, run `bundle in
 by `bundle exec rake`. You'll need Ruby and the rake gem if you use
 the second method.
 
-These extensions work equally well with both the default and sanitizing converters.
-
 ![travis](https://secure.travis-ci.org/jmcmanus/pagedown-extra.png)
 
 
@@ -22,27 +20,27 @@ In order to use the extensions, you'll need to include
 demo for a working example.
 
 ```javascript
+// create a pagedown converter - regular and sanitized versions are both supported
 var converter = new Markdown.Converter();
-Markdown.Extra.init(converter, {extensions: "all"});
-// options object is unnecessary in this case -- "all" is the default
-```
-
-Otherwise, you can choose from the extensions currently supported:
-
-```javascript
-// ascii tables
-Markdown.Extra.init(converter, {extensions: "tables"});
-// gfm fenced code blocks 
-Markdown.Extra.init(converter, {extensions: "fenced_code_gfm"});
+// tell the converter to use Markdown Extra
+Markdown.Extra.init(converter);
+// convert some markdown
+var html = converter.makeHtml("| A | B |\n| :-: | :-: |\n| 1 | 2 |");
 ```
 
 If you're using multiple converters on the same page, you can just call
 `Markdown.Extra.init` once for each converter and you're all set.
 
+If you want, you can choose to use only a subset of the extensions currently supported:
+
+```javascript
+Markdown.Extra.init(converter, {extensions: ["tables", "fenced_code_gfm", "def_list"]});
+```
+
+See the Extension/Option Reference below for a complete list.
+
 
 ### [Tables][5]
-
-Markdown.Extra supports ascii-formatted tables:
 
 ```markdown
 | Item      | Value | Qty |
@@ -65,7 +63,7 @@ You can also specify a class for the generated tables using
 
 Within markdown tables, markdown inside of table cells will also be converted. By
 default a sanitizing converter is used, but you can change this by adding `sanitize: false`
-to the options object passed to `init`. Only span-level tags are retained
+to the options object passed to `init`. Additionally, only span-level tags are retained
 inside of table cells, per the PHP Markdown Extra spec.
 
 
@@ -86,7 +84,7 @@ Will be transformed into:
 ```
 
 You can specify a syntax highlighter in the options object passed to `Markdown.Extra.init`,
-in which case the html generated from fenced code blocks will be compatible with it.
+in which it will generate html compatible with that highlighter.
 Both [google-code-prettify][3] and [Highlight.js][4] are currently supported:
 
 ```javascript
@@ -95,7 +93,7 @@ Markdown.Extra.init(converter, {highlighter: "prettify"});
 ```
 
 If either of those is specified, the language type will be added to the code tag, e.g.
-`<code class="language-javascript">`, otherwise you just get the standard 
+`<code class="language-javascript">`, otherwise you just get the standard
 `<code class="javascript">` as in PHP Markdown Extra. If `prettify` is specified,
 `<pre>` also becomes `<pre class="prettyprint">`. Otherwise, the markup is the
 same as what Pagedown produces for regular indented code blocks.  For example, when using
@@ -196,7 +194,7 @@ seems to be quickly becoming the most widely used markdown implementation.
 ### Special Characters
 
 Markdown Extra adds two new special characters, `|` and `:`, that can be escaped
-by preceding them with `\`. Doing so will cause them to be ignored when determining
+by preceding them with `\`. Doing so will cause the escaped character to be ignored when determining
 the extent of code blocks and definition lists.
 
 

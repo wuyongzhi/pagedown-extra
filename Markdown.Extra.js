@@ -44,7 +44,7 @@
     var obj = {};
     for (var i = 0; i < x.length; i++)
        obj[x[i]] = x[i];
-    for (i = 0; i < x.length; i++)
+    for (i = 0; i < y.length; i++)
        obj[y[i]] = y[i];
     var res = [];
     for (var k in obj) {
@@ -247,7 +247,7 @@
   Markdown.Extra.prototype.applyAttributeBlocks = function(text) {
     var self = this;
     var blockRe = new RegExp('<p>~XX(\\d+)XX</p>[\\s\\S]*' +
-                             '(?:<(h[1-6]|pre)(?: +class="(\\S+)")?(>.*</\\2>))', "gm");
+                             '(?:<(h[1-6]|pre)(?: +class="(\\S+)")?(>[\\s\\S]*</\\2>))', "gm");
     text = text.replace(blockRe, function(wholeMatch, k, tag, cls, rest) {
       if (!tag) // no following header or fenced code block.
         return '';
@@ -264,8 +264,6 @@
       var classes = attributes.match(/\.[^\s{}]+/g) || [];
       for (var i = 0; i < classes.length; i++) // Remove leading dot
         classes[i] = classes[i].substr(1, classes[i].length - 1);
-
-      classes = classes.reverse();
 
       var classStr = '';
       if (cls)

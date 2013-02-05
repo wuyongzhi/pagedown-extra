@@ -212,7 +212,7 @@
          '(?:[ ]*[|].*\\n?)*'      , // Table rows
        ')',
        '(?:\\n|$)'                   // Stop at final newline
-      ].join('')                   ,
+      ].join(''),
       'gm'
     );
 
@@ -228,7 +228,7 @@
          '(?:.*[|].*\\n?)*'        , // Table rows
        ')'                         ,
        '(?:\\n|$)'                   // Stop at final newline
-      ].join('')                   ,
+      ].join(''),
       'gm'
     );
 
@@ -360,35 +360,36 @@
   // Find and convert markdown extra definition lists into html.
   Markdown.Extra.prototype.definitionLists = function(text) {
     var wholeList = new RegExp(
-      '(\\x02\\n?|\\n\\n)' +
-        '(?:'     +
-          '('                       + // $1 = whole list
-            '('                     + // $2
-              '[ ]{0,3}' +
-              '((?:[ \\t]*\\S.*\\n)+)' + // $3 = defined term
-              '\\n?'                +
-              '[ ]{0,3}:[ ]+' + // colon starting definition
-            ')'                     +
-            '([\\s\\S]+?)'          +
-            '('                     + // $4
-                '(?=\\0x03)'        + // \z
-              '|'                   +
-                '(?='               +
-                  '\\n{2,}'         +
-                  '(?=\\S)'         +
-                  '(?!'             + // Negative lookahead for another term
-                    '[ ]{0,3}' +
-                    '(?:\\S.*\\n)+?' + // defined term
-                    '\\n?'          +
-                    '[ ]{0,3}:[ ]+' + // colon starting definition
-                  ')'               +
-                  '(?!'             + // Negative lookahead for another definition
-                    '[ ]{0,3}:[ ]+' + // colon starting definition
-                  ')'               +
-                ')'                 +
-            ')'                     +
-          ')'                       +
-      ')',
+      ['(\\x02\\n?|\\n\\n)'          ,
+       '(?:'                         ,
+         '('                         , // $1 = whole list
+           '('                       , // $2
+             '[ ]{0,3}'              ,
+             '((?:[ \\t]*\\S.*\\n)+)', // $3 = defined term
+             '\\n?'                  ,
+             '[ ]{0,3}:[ ]+'         , // colon starting definition
+           ')'                       ,
+           '([\\s\\S]+?)'            ,
+           '('                       , // $4
+               '(?=\\0x03)'          , // \z
+             '|'                     ,
+               '(?='                 ,
+                 '\\n{2,}'           ,
+                 '(?=\\S)'           ,
+                 '(?!'               , // Negative lookahead for another term
+                   '[ ]{0,3}'        ,
+                   '(?:\\S.*\\n)+?'  , // defined term
+                   '\\n?'            ,
+                   '[ ]{0,3}:[ ]+'   , // colon starting definition
+                 ')'                 ,
+                 '(?!'               , // Negative lookahead for another definition
+                   '[ ]{0,3}:[ ]+'   , // colon starting definition
+                 ')'                 ,
+               ')'                   ,
+           ')'                       ,
+         ')'                         ,
+       ')'
+      ].join(''),
       'gm'
     );
 
@@ -396,11 +397,9 @@
     text = addAnchors(text);
 
     text = text.replace(wholeList, function(match, pre, list) {
-        // Turn double returns into triple returns, so that we can make a
-        // paragraph for the last item in a list, if necessary:
-        var result = trim(self.processDefListItems(list));
-        result = "<dl>\n" + result + "\n</dl>";
-        return pre + self.hashExtraBlock(result) + "\n\n";
+      var result = trim(self.processDefListItems(list));
+      result = "<dl>\n" + result + "\n</dl>";
+      return pre + self.hashExtraBlock(result) + "\n\n";
     });
 
     return removeAnchors(text);
@@ -412,32 +411,33 @@
     var self = this;
 
     var dt = new RegExp(
-        '(\\x02\\n?|\\n\\n+)'              + // leading line
-        '('                                + // definition terms = $1
-            '[ ]{0,3}' + // leading whitespace
-            '(?![:][ ]|[ ])'               + // negative lookahead for a definition
-                                             //   mark (colon) or more whitespace.
-            '(?:\\S.*\\n)+?'               + // actual term (not whitespace).
-        ')'                                +
-        '(?=\\n?[ ]{0,3}:[ ])'             , // lookahead for following line feed
-                                             //   with a definition mark.
-        'mg'
+      ['(\\x02\\n?|\\n\\n+)'    , // leading line
+       '('                      , // definition terms = $1
+         '[ ]{0,3}'             , // leading whitespace
+         '(?![:][ ]|[ ])'       , // negative lookahead for a definition
+                                  //   mark (colon) or more whitespace
+         '(?:\\S.*\\n)+?'       , // actual term (not whitespace)
+       ')'                      ,
+       '(?=\\n?[ ]{0,3}:[ ])'     // lookahead for following line feed
+      ].join(''),                 //   with a definition mark
+      'mg'
     );
 
     var dd = new RegExp(
-        '\\n(\\n+)?'                       + // leading line = $1
-        '('                                + // marker space = $2
-            '[ ]{0,3}'                     + // whitespace before colon
-            '[:][ ]+'                      + // definition mark (colon)
-        ')'                                +
-        '([\\s\\S]+?)'                     + // definition text = $3
-        '(?=\\n*'                          + // stop at next definition mark,
-            '(?:'                          + // next term or end of text
-                '\\n[ ]{0,3}[:][ ]|'       +
-                '<dt>|\\x03'               + // \z
-            ')'                            +
-        ')',
-        'mg'
+      ['\\n(\\n+)?'              , // leading line = $1
+       '('                       , // marker space = $2
+         '[ ]{0,3}'              , // whitespace before colon
+         '[:][ ]+'               , // definition mark (colon)
+       ')'                       ,
+       '([\\s\\S]+?)'            , // definition text = $3
+       '(?=\\n*'                 , // stop at next definition mark,
+         '(?:'                   , // next term or end of text
+           '\\n[ ]{0,3}[:][ ]|'  ,
+           '<dt>|\\x03'          , // \z
+         ')'                     ,
+       ')'
+      ].join(''),
+      'mg'
     );
 
     listStr = addAnchors(listStr);
@@ -446,33 +446,33 @@
 
     // Process definition terms.
     listStr = listStr.replace(dt, function(match, pre, termsStr) {
-        var terms = trim(termsStr).split("\n");
-        var text = '';
-        for (var i = 0; i < terms.length; i++) {
-            var term = terms[i];
-            // process spans inside dt
-            term = convertSpans(trim(term), self.converter);
-            text += "\n<dt>" + term + "</dt>";
-        }
-        return text + "\n";
+      var terms = trim(termsStr).split("\n");
+      var text = '';
+      for (var i = 0; i < terms.length; i++) {
+        var term = terms[i];
+        // process spans inside dt
+        term = convertSpans(trim(term), self.converter);
+        text += "\n<dt>" + term + "</dt>";
+      }
+      return text + "\n";
     });
 
     // Process actual definitions.
-    listStr = listStr.replace(dd, function(match, leading_line, marker_space, def) {
-        if (leading_line || def.match(/\n{2,}/)) {
-            // replace marker with the appropriate whitespace indentation
-            def = Array(marker_space.length + 1).join(' ') + def;
-            // process markdown inside definition
-            // currently doesn't apply extensions
-            def = outdent(def) + "\n\n";
-            def = "\n" + self.converter.makeHtml(def) + "\n";
-        } else {
-            // convert span-level markdown inside definition
-            def = rtrim(def);
-            def = convertSpans(outdent(def), self.converter);
-        }
+    listStr = listStr.replace(dd, function(match, leadingLine, markerSpace, def) {
+      if (leadingLine || def.match(/\n{2,}/)) {
+        // replace marker with the appropriate whitespace indentation
+        def = Array(markerSpace.length + 1).join(' ') + def;
+        // process markdown inside definition
+        // TODO?: currently doesn't apply extensions
+        def = outdent(def) + "\n\n";
+        def = "\n" + self.converter.makeHtml(def) + "\n";
+      } else {
+        // convert span-level markdown inside definition
+        def = rtrim(def);
+        def = convertSpans(outdent(def), self.converter);
+      }
 
-        return "\n<dd>" + def + "</dd>\n";
+      return "\n<dd>" + def + "</dd>\n";
     });
 
     return removeAnchors(listStr);

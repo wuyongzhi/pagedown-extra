@@ -305,12 +305,15 @@ describe("Markdown.Extra", function() {
       });
 
       it("should correctly apply classes and ids to headers", function() {
-        var attrBlock1 = "Hello There {#header-id .class1}\n=========\n";
-        var attrBlock2 = "## Hello There {#header-id .class1}\n";
-        var html1 = sconv.makeHtml(attrBlock1);
-        var html2 = sconv.makeHtml(attrBlock2);
+        var hdrBlock1 = "Hello There {#header-id .class1}\n=========\n";
+        var hdrBlock2 = "## Hello There {#header-id .class1}\n";
+        var hdrBlock3 = "## Hello There ##  {#header-id .class1}\n";
+        var html1 = sconv.makeHtml(hdrBlock1);
+        var html2 = sconv.makeHtml(hdrBlock2);
+        var html3 = sconv.makeHtml(hdrBlock3);
         expect(html1).toMatch(/<h1 id="header-id" class="class1">/);
         expect(html2).toMatch(/<h2 id="header-id" class="class1">/);
+        expect(html3).toMatch(/<h2 id="header-id" class="class1">/);
       });
 
       it("should correctly apply classes and ids to fenced code blocks", function() {

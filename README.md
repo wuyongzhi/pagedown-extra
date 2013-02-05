@@ -146,6 +146,23 @@ becomes:
 Definitions can contain both inline and block-level markdown.
 
 
+## [Special Attributes][8]
+
+You can add class and id attributes to headers and gfm fenced code blocks.
+
+```markdown
+    ``` {#gfm-id .gfm-class}
+    var foo = bar;
+    ```
+
+## A Header {#header-id}
+
+### Another One ### {#header-id .hclass}
+
+Underlined  {#what}
+==========
+```
+
 ## Extension / Option Reference
 You can enable all of the currently supported extensions with `{extensions: "all"}`. This is also
 the default. If specifying multiple extensions, you must provide them as an array. Here
@@ -156,10 +173,11 @@ same naming scheme as the excellent Python Markdown library.
 | --------------- | ----------- |
 | fenced_code_gfm | GFM fenced code blocks |
 | tables          | Pretty tables! |
-| def_list      | Definition lists |
-| *attr_list*     | Special attributes list for headers and fenced code blocks |
-| *fenced_code*   | PHP Markdown Extra fenced code blocks |
+| def_list        | Definition lists |
+| attr_list       | Special attributes list for headers and fenced code blocks |
 | *smart_strong*  | No strong emphasis in the middle of words |
+| *abbr*          | Abbreviations |
+| *fenced_code*   | PHP Markdown Extra fenced code blocks |
 
 | Option          | Description |
 | --------------- | ----------- |
@@ -167,7 +185,7 @@ same naming scheme as the excellent Python Markdown library.
 | highlighter     | Code highlighter. Must be one of `highlight` and `prettify` for now |
 | sanitize        | Whether to sanitize inline html (in generated tables, for instance). Defaults to true. |
 
-*Italicized are planned, and will be added in roughly the order shown*
+*Italicized extensions are planned, and will be added in roughly the order shown*
 
 See PHP Markdown Extra's [documentation][1] for a more complete overview
 of syntax. In situations where it differs from how things are done on GitHub --
@@ -193,4 +211,4 @@ See LICENSE.txt
 [5]: http://michelf.ca/projects/php-markdown/extra/#table
 [6]: http://github.github.com/github-flavored-markdown/
 [7]: http://michelf.ca/projects/php-markdown/extra/#def-list
-
+[8]: http://michelf.ca/projects/php-markdown/extra/#spe-attr

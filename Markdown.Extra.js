@@ -228,7 +228,7 @@
     // TODO: use sentinels. Should we just add/remove them in doConversion?
     // TODO: better matches for id / class attributes
     var attrBlock = "\\{\\s*[.|#][^}]+\\}";
-    var hdrAttributesA = new RegExp("^(#{1,6}.*)\\s+(" + attrBlock + ")\\s*(\\n|0x03)", "gm");
+    var hdrAttributesA = new RegExp("^(#{1,6}.*\\s*#{0,6})\\s+(" + attrBlock + ")\\s*(\\n|0x03)", "gm");
     var hdrAttributesB = new RegExp("^(.*\\s.*)\\s+(" + attrBlock + ")\\s*\\n" +
                                     "(?=[\\-|=]+\\s*(\\n|0x03))", "gm"); // underline lookahead
     var fcbAttributes =  new RegExp("^(```[^{]*)\\s+(" + attrBlock + ")\\s*\\n" +

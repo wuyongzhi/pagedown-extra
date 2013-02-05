@@ -25,7 +25,7 @@
 
   // Remove one level of indentation from text. Indent is 4 spaces.
   function outdent(text) {
-      return text.replace(new RegExp('^(\\t|[ ]{1,4})', 'mg'), '');
+      return text.replace(new RegExp('^(\\t|[ ]{1,4})', 'gm'), '');
   }
 
   function contains(str, substr) {
@@ -37,6 +37,21 @@
     return html.replace(/<[^>]*>?/gi, function(tag) {
       return tag.match(whitelist) ? tag : '';
     });
+  }
+
+  // Merge two arrays, keeping only unique elements.
+  function union(x, y) {
+    var obj = {};
+    for (var i = 0; i < x.length; i++)
+       obj[x[i]] = x[i];
+    for (i = 0; i < x.length; i++)
+       obj[y[i]] = y[i];
+    var res = [];
+    for (var k in obj) {
+      if (obj.hasOwnProperty(k))
+        res.push(obj[k]);
+    }
+    return res;
   }
 
   // JS regexes don't support \A or \Z, so we add sentinels, as Pagedown
@@ -94,6 +109,9 @@
     // they're not destroyed if the user is using a sanitizing converter
     this.hashBlocks = [];
 
+    // Special attribute blocks for fenced code blocks and headers enabled.
+    this.attributeBlocks = false;
+
     // Fenced code block options
     this.googleCodePrettify = false;
     this.highlightJs = false;
@@ -114,6 +132,7 @@
     options.extensions = options.extensions || ["all"];
     if (contains(options.extensions, "all")) {
       transformations.push("all");
+      extra.attributeBlocks = true;
     } else {
       if (contains(options.extensions, "tables"))
         transformations.push("tables");
@@ -121,6 +140,8 @@
         transformations.push("fencedCodeBlocks");
       if (contains(options.extensions, "def_list"))
         transformations.push("definitionLists");
+      if (contains(options.extensions, "attr_list"))
+        extra.attributeBlocks = true;
     }
 
     // preBlockGamut also gives us access to a hook so we can run the
@@ -159,6 +180,10 @@
     this.hashBlocks = [];
 
     text = processEscapes(text);
+
+    if (this.attributeBlocks)
+      text = this.hashAttributeBlocks(text);
+
     for(var i = 0; i < transformations.length; i++)
       text = this[transformations[i]](text);
 
@@ -166,9 +191,13 @@
   };
 
   // Clear state vars that may use unnecessary memory. Unhash blocks we
-  // stored and return converted text.
+  // stored, apply attribute blocks if necessary, and return converted text.
   Markdown.Extra.prototype.finishConversion = function(text) {
     text = this.unHashExtraBlocks(text);
+
+    if (this.attributeBlocks)
+      text = this.applyAttributeBlocks(text);
+
     this.hashBlocks = [];
     return text;
   };
@@ -184,12 +213,72 @@
   Markdown.Extra.prototype.unHashExtraBlocks = function(text) {
     var self = this;
     text = text.replace(/<p>~X(\d+)X<\/p>/g, function(wholeMatch, m1) {
-      key = parseInt(m1, 10);
+      var key = parseInt(m1, 10);
       return self.hashBlocks[key];
     });
     return text;
   };
 
+  /******************************************************************
+   * Attribute Blocks                                               *
+   *****************************************************************/
+  // Extract attribute blocks, move them above the element they will be
+  // applied to, and hash them for later.
+  Markdown.Extra.prototype.hashAttributeBlocks = function(text) {
+    // TODO: use sentinels. Should we just add/remove them in doConversion?
+    // TODO: better matches for id / class attributes
+    var attrBlock = "\\{\\s*[.|#][^}]+\\}";
+    var hdrAttributesA = new RegExp("^(#{1,6}.*)\\s+(" + attrBlock + ")\\s*(\\n|0x03)", "gm");
+    var hdrAttributesB = new RegExp("^(.*\\s.*)\\s+(" + attrBlock + ")\\s*\\n" +
+                                    "(?=[\\-|=]+\\s*(\\n|0x03))", "gm"); // underline lookahead
+    var fcbAttributes =  new RegExp("^(```[^{]*)\\s+(" + attrBlock + ")\\s*\\n" +
+                                    "(?=([\\s\\S]*?)\\n```\\s*(\\n|0x03))", "gm");
+
+    var self = this;
+    function attributeCallback(wholeMatch, pre, attr) {
+      return '<p>~XX' + (self.hashBlocks.push(attr) - 1) + 'XX</p>\n' + pre + "\n";
+    }
+
+    text = text.replace(hdrAttributesA, attributeCallback);  // ## headers
+    text = text.replace(hdrAttributesB, attributeCallback);  // underline headers
+    return text.replace(fcbAttributes, attributeCallback);
+  };
+
+  Markdown.Extra.prototype.applyAttributeBlocks = function(text) {
+    var self = this;
+    var blockRe = new RegExp('<p>~XX(\\d+)XX</p>[\\s\\S]*' +
+                             '(?:<(h[1-6]|pre)(?: +class="(\\S+)")?(>.*</\\2>))', "gm");
+    text = text.replace(blockRe, function(wholeMatch, k, tag, cls, rest) {
+      if (!tag) // no following header or fenced code block.
+        return '';
+
+      // get attributes list from hash
+      var key = parseInt(k, 10);
+      var attributes = self.hashBlocks[key];
+
+      // get id
+      var id = attributes.match(/#[^\s{}]+/g) || [];
+      var idStr = id[0] ? ' id="' + id[0].substr(1, id[0].length - 1) + '"' : '';
+
+      // get classes and merge with existing classes
+      var classes = attributes.match(/\.[^\s{}]+/g) || [];
+      for (var i = 0; i < classes.length; i++) // Remove leading dot
+        classes[i] = classes[i].substr(1, classes[i].length - 1);
+
+      classes = classes.reverse();
+
+      var classStr = '';
+      if (cls)
+        classes = union(classes, [cls]);
+
+      if (classes.length > 0)
+        classStr = ' class="' + classes.join(' ') + '"';
+
+      return "<" + tag + idStr + classStr + rest;
+    });
+
+    return text;
+  };
 
   /******************************************************************
    * Tables                                                         *
@@ -420,7 +509,7 @@
        ')'                      ,
        '(?=\\n?[ ]{0,3}:[ ])'     // lookahead for following line feed
       ].join(''),                 //   with a definition mark
-      'mg'
+      'gm'
     );
 
     var dd = new RegExp(
@@ -437,7 +526,7 @@
          ')'                     ,
        ')'
       ].join(''),
-      'mg'
+      'gm'
     );
 
     listStr = addAnchors(listStr);

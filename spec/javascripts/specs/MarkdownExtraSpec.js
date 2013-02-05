@@ -64,8 +64,10 @@ describe("Markdown.Extra", function() {
     it("should use 'all' extensions if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "all"});
       spyOn(extra, "all").andCallThrough();
+      spyOn(extra, "hashAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.all).toHaveBeenCalled();
+      expect(extra.hashAttributeBlocks).toHaveBeenCalled();
     });
 
     it("should use 'tables' extension if specified", function() {
@@ -77,13 +79,6 @@ describe("Markdown.Extra", function() {
       expect(extra.fencedCodeBlocks).wasNotCalled();
     });
 
-    it("should use 'def_list' extension if specified", function() {
-      var extra = Markdown.Extra.init(converter, {extensions: "def_list"});
-      spyOn(extra, "definitionLists").andCallThrough();
-      converter.makeHtml(markdown);
-      expect(extra.definitionLists).toHaveBeenCalled();
-    });
-
     it("should use 'fencedCodeBlocks' extension if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "fenced_code_gfm"});
       spyOn(extra, "tables").andCallThrough();
@@ -91,6 +86,24 @@ describe("Markdown.Extra", function() {
       converter.makeHtml(markdown);
       expect(extra.fencedCodeBlocks).toHaveBeenCalled();
       expect(extra.tables).wasNotCalled();
+    });
+
+    it("should use 'def_list' extension if specified", function() {
+      var extra = Markdown.Extra.init(converter, {extensions: "def_list"});
+      spyOn(extra, "definitionLists").andCallThrough();
+      spyOn(extra, "hashAttributeBlocks").andCallThrough();
+      converter.makeHtml(markdown);
+      expect(extra.definitionLists).toHaveBeenCalled();
+      expect(extra.hashAttributeBlocks).wasNotCalled();
+    });
+
+    it("should use 'attr_list' extension if specified", function() {
+      var extra = Markdown.Extra.init(converter, {extensions: "attr_list"});
+      spyOn(extra, "hashAttributeBlocks").andCallThrough();
+      spyOn(extra, "definitionLists").andCallThrough();
+      converter.makeHtml(markdown);
+      expect(extra.hashAttributeBlocks).toHaveBeenCalled();
+      expect(extra.definitionLists).wasNotCalled();
     });
 
     it("should apply table class if specified", function() {
@@ -282,6 +295,36 @@ describe("Markdown.Extra", function() {
         var html = sconv.makeHtml(defListComplex);
         var matches = html.match(/<dl>/g);
         expect(matches.length).toEqual(1);
+      });
+    });
+
+    describe("with attribute lists", function() {
+      beforeEach(function() {
+        sconv = Markdown.getSanitizingConverter();
+        Markdown.Extra.init(sconv);
+      });
+
+      it("should correctly apply classes and ids to headers", function() {
+        var attrBlock1 = "Hello There {#header-id .class1}\n=========\n";
+        var attrBlock2 = "## Hello There {#header-id .class1}\n";
+        var html1 = sconv.makeHtml(attrBlock1);
+        var html2 = sconv.makeHtml(attrBlock2);
+        expect(html1).toMatch(/<h1 id="header-id" class="class1">/);
+        expect(html2).toMatch(/<h2 id="header-id" class="class1">/);
+      });
+
+      it("should correctly apply classes and ids to fenced code blocks", function() {
+        var text = "```foolang {.prettyprint .foo #awesome}\nfoo=bar;\n```";
+        var html = sconv.makeHtml(text);
+        expect(html).toMatch(/<pre id="awesome" class="foo prettyprint">/);
+      });
+
+      it("should merge classes with preexisting classes", function() {
+        var text = "```foolang {.test-class}\nfoo=bar;\n```";
+        var converter = Markdown.getSanitizingConverter();
+        Markdown.Extra.init(converter, {highlighter: "prettify"});
+        var html = converter.makeHtml(text);
+        expect(html).toMatch(/<pre class="test-class prettyprint">/);
       });
     });
   });

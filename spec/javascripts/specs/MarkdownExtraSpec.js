@@ -181,7 +181,6 @@ describe("Markdown.Extra", function() {
         var html = sconv.makeHtml('<div>' + codeBlock + '</div>');
         expect(html).not.toMatch(/<pre><code/);
       });
-
     });
 
     describe("with tables", function() {
@@ -254,6 +253,12 @@ describe("Markdown.Extra", function() {
       it("should not recognize tables within block-level tags", function() {
         var html = sconv.makeHtml('<div>' + tableHtml + '</div>');
         expect(html).not.toMatch(/table/);
+      });
+
+      it("should treat $ and ~ properly", function() {
+        var text ="|a|~b|\n|-|-|\n|$1|$2|";
+        var html = sconv.makeHtml(text);
+        expect(html).toMatch(/<table>[\s\S]*~[\s\S]*\$[\s\S]*<\/table>/);
       });
     });
 

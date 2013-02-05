@@ -80,11 +80,29 @@
   // pagedown coverter to do the complete conversion, and then retain
   // only the specified tags -- inline in this case).
   function convertSpans(text, converter) {
+    text = denormalize(text);
     var html = converter.makeHtml(text);
     return sanitizeHtml(html, inlineTags);
   }
 
-  // Converte escpaed special characters to HTLM decimal entity codes.
+  // Convert markdown using the stock pagedown converter
+  function convertAll(text, converter) {
+    text = denormalize(text);
+    return converter.makeHtml(text);
+  }
+
+  // We use convertSpans and convertAll to convert markdown inside of Markdown Extra
+  // elements we create. Since this markdown has already been through the pagedown
+  // normalization process before our hooks were called, we need to do some
+  // denormalization before sending it back through.
+  function denormalize(text) {
+    // Restore dollar signs and tildes
+    text = text.replace(/~D/g, "$$");
+    text = text.replace(/~T/g, "~");
+    return text;
+  }
+
+  // Convert escaped special characters to HTML decimal entity codes.
   function processEscapes(text) {
     // Markdown extra adds two escapable characters, `:` and `|`
     // If escaped, we convert them to html entities so our
@@ -205,7 +223,7 @@
   // Return a placeholder containing a key, which is the block's index in the
   // hashBlocks array. We wrap our output in a <p> tag here so Pagedown won't.
   Markdown.Extra.prototype.hashExtraBlock = function(block) {
-    return '<p>~X' + (this.hashBlocks.push(block) - 1) + 'X</p>';
+    return '\n<p>~X' + (this.hashBlocks.push(block) - 1) + 'X</p>\n';
   };
 
   // Replace placeholder blocks in `text` with their corresponding
@@ -219,9 +237,11 @@
     return text;
   };
 
+
   /******************************************************************
    * Attribute Blocks                                               *
    *****************************************************************/
+
   // Extract attribute blocks, move them above the element they will be
   // applied to, and hash them for later.
   Markdown.Extra.prototype.hashAttributeBlocks = function(text) {
@@ -552,7 +572,7 @@
         // process markdown inside definition
         // TODO?: currently doesn't apply extensions
         def = outdent(def) + "\n\n";
-        def = "\n" + self.converter.makeHtml(def) + "\n";
+        def = "\n" + convertAll(def, self.converter) + "\n";
       } else {
         // convert span-level markdown inside definition
         def = rtrim(def);

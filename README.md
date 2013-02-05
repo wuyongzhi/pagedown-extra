@@ -11,6 +11,7 @@ These extensions work equally well with both the default and sanitizing converte
 
 ![travis](https://secure.travis-ci.org/jmcmanus/pagedown-extra.png)
 
+
 ## Usage
 
 First, make sure you have the most recent version of Pagedown (as of Feb 3, 2013),
@@ -37,6 +38,7 @@ Markdown.Extra.init(converter, {extensions: "fenced_code_gfm"});
 
 If you're using multiple converters on the same page, you can just call
 `Markdown.Extra.init` once for each converter and you're all set.
+
 
 ### [Tables][5]
 
@@ -65,6 +67,7 @@ Within markdown tables, markdown inside of table cells will also be converted. B
 default a sanitizing converter is used, but you can change this by adding `sanitize: false`
 to the options object passed to `init`. Only span-level tags are retained
 inside of table cells, per the PHP Markdown Extra spec.
+
 
 ### [Fenced Code Blocks][6]
 
@@ -110,7 +113,8 @@ Would generate the following html:
 </pre>
 ```
 
-## [Definition Lists][7]
+
+### [Definition Lists][7]
 
 ```markdown
 Term 1
@@ -152,7 +156,7 @@ same naming scheme as the excellent Python Markdown library.
 | --------------- | ----------- |
 | fenced_code_gfm | GFM fenced code blocks |
 | tables          | Pretty tables! |
-| *def_list*      | Definition lists |
+| def_list      | Definition lists |
 | *attr_list*     | Special attributes list for headers and fenced code blocks |
 | *fenced_code*   | PHP Markdown Extra fenced code blocks |
 | *smart_strong*  | No strong emphasis in the middle of words |
@@ -169,6 +173,7 @@ See PHP Markdown Extra's [documentation][1] for a more complete overview
 of syntax. In situations where it differs from how things are done on GitHub --
 alignment of table headers, for instance -- I've chosen compatibility with gfm, which
 seems to be quickly becoming the most widely used markdown implementation.
+
 
 ### Special Characters
 
@@ -188,3 +193,4 @@ MIT: http://justinm.mit-license.org
 [5]: http://michelf.ca/projects/php-markdown/extra/#table
 [6]: http://github.github.com/github-flavored-markdown/
 [7]: http://michelf.ca/projects/php-markdown/extra/#def-list
+

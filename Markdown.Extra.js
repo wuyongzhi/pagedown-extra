@@ -378,7 +378,7 @@
                   '(?=\\S)'         +
                   '(?!'             + // Negative lookahead for another term
                     '[ ]{0,3}' +
-                    '(?:\\S.*\\n )+?' + // defined term
+                    '(?:\\S.*\\n)+?' + // defined term
                     '\\n?'          +
                     '[ ]{0,3}:[ ]+' + // colon starting definition
                   ')'               +

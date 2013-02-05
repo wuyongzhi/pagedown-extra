@@ -27,6 +27,17 @@ describe("Markdown.Extra", function() {
 
   var defList = "Term 1\nTerm 2\n:   Def1";
   var defListHtml = "<dl>\n<dt>Term 1</dt>\n<dt>Term 2</dt>\n<dd>Def1</dd>\n</dl>";
+  var defListComplex = "Term 1\n\n" +
+          ":   This definition has a code block, a blockquote and a list.\n\n" +
+          "        code block.\n\n" +
+          "    > block quote\n" +
+          "    > on two lines.\n\n" +
+          "    1.  first list item\n" +
+          "    2.  second list item\n\n" +
+          "Term 2\n\n" +
+          ":   Definition 2\n\n";
+
+
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
@@ -263,15 +274,14 @@ describe("Markdown.Extra", function() {
       });
 
       it("should convert block-level elements in definitions", function() {
-        var defList = "Term 2\n\n" +
-          ":   This definition has a code block, a blockquote and a list.\n\n" +
-          "        code block.\n\n" +
-          "    > block quote\n" +
-          "    > on two lines.\n\n" +
-          "    1.  first list item\n" +
-          "    2.  second list item\n\n";
-        var html = sconv.makeHtml(defList);
+        var html = sconv.makeHtml(defListComplex);
         expect(html).toMatch(/<pre><code>[\s\S]*<blockquote>[\s\S]*<ol>/);
+      });
+
+      it("should not convert a list with multiple defs into multiple lists", function() {
+        var html = sconv.makeHtml(defListComplex);
+        var matches = html.match(/<dl>/g);
+        expect(matches.length).toEqual(1);
       });
     });
   });

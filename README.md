@@ -42,6 +42,8 @@ See the Extension/Option Reference below for a complete list.
 
 ### [Tables][5]
 
+The following markdown:
+
 ```markdown
 | Item      | Value | Qty |
 | --------- | -----:|:--: |
@@ -50,7 +52,7 @@ See the Extension/Option Reference below for a complete list.
 | Pipe      |    $1 |234  |
 ```
 
-Which will render to something like this depending on how you choose to style it:
+will render to something like this depending on how you choose to style it:
 
 | Item      | Value | Qty |
 | --------- | -----:|:--: |
@@ -148,18 +150,18 @@ Definitions can contain both inline and block-level markdown.
 
 You can add class and id attributes to headers and gfm fenced code blocks.
 
-```markdown
+
     ``` {#gfm-id .gfm-class}
     var foo = bar;
     ```
 
-## A Header {#header-id}
+    ## A Header {#header-id}
 
-### Another One ### {#header-id .hclass}
+    ### Another One ### {#header-id .hclass}
 
-Underlined  {#what}
-==========
-```
+    Underlined  {#what}
+    ==========
+
 
 ## Extension / Option Reference
 You can enable all of the currently supported extensions with `{extensions: "all"}`. This is also

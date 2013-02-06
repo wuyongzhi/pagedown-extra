@@ -310,9 +310,9 @@ describe("Markdown.Extra", function() {
       });
 
       it("should correctly apply attributes to headers", function() {
-        var hdrBlock1 = "Hello There {#header-id .class1}\n=========\n";
-        var hdrBlock2 = "## Hello There {#header-id .class1}\n";
-        var hdrBlock3 = "## Hello There ##  {#header-id .class1}\n";
+        var hdrBlock1 = "Hello There {#header-id .class1}\n=========";
+        var hdrBlock2 = "## Hello There {#header-id .class1}";
+        var hdrBlock3 = "## Hello There ##  {#header-id .class1}";
         var html1 = sconv.makeHtml(hdrBlock1);
         var html2 = sconv.makeHtml(hdrBlock2);
         var html3 = sconv.makeHtml(hdrBlock3);
@@ -322,7 +322,7 @@ describe("Markdown.Extra", function() {
       });
 
       it("should correctly apply attributes to fenced code blocks", function() {
-        var text = "```\t{.test-class #test-id} \nfoo=bar;\n  var x;\n\n```\t\n";
+        var text = "```\t{.test-class #test-id} \nfoo=bar;\n  var x;\n\n```";
         var html = sconv.makeHtml(text);
         expect(html).toMatch(/<pre id="test-id" class="test-class">/);
       });

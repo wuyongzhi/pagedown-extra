@@ -63,10 +63,7 @@ will render to something like this depending on how you choose to style it:
 You can also specify a class for the generated tables using
 `Markdown.Extra.init(converter, {table_class: "table table-striped"})` for instance.
 
-Within markdown tables, markdown inside of table cells will also be converted. By
-default a sanitizing converter is used, but you can change this by adding `sanitize: false`
-to the options object passed to `init`. Additionally, only span-level tags are retained
-inside of table cells, per the PHP Markdown Extra spec.
+Within markdown tables, inline span-level markdown inside of table cells will also be converted.
 
 
 ### [Fenced Code Blocks][6]
@@ -183,7 +180,6 @@ same naming scheme as the excellent Python Markdown library.
 | --------------- | ----------- |
 | table_class     | Class added to all markdown tables. Useful when using frameworks like bootstrap. |
 | highlighter     | Code highlighter. Must be one of `highlight` and `prettify` for now |
-| sanitize        | Whether to sanitize inline html (in generated tables, for instance). Defaults to true. |
 
 *Italicized extensions are planned, and will be added in roughly the order shown*
 

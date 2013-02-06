@@ -85,7 +85,7 @@
     return sanitizeHtml(html, inlineTags);
   }
 
-  // Convert markdown using the stock pagedown converter
+  // Convert internal markdown using the stock pagedown converter
   function convertAll(text, converter) {
     text = denormalize(text);
     return converter.makeHtml(text);
@@ -94,7 +94,7 @@
   // We use convertSpans and convertAll to convert markdown inside of Markdown Extra
   // elements we create. Since this markdown has already been through the pagedown
   // normalization process before our hooks were called, we need to do some
-  // denormalization before sending it back through.
+  // denormalization before sending it back through a different Pagedown converter.
   function denormalize(text) {
     // Restore dollar signs and tildes
     text = text.replace(/~D/g, "$$");
@@ -109,6 +109,13 @@
     // regexes don't recognize them. Markdown doesn't support escaping
     // the escape character, e.g. `\\`, which make this even simpler.
     return text.replace(/\\\|/g, '&#124;').replace(/\\:/g, '&#58;');
+  }
+
+  // Determine if the given pagedown converter performs sanitization
+  // on postConversion
+  function isSanitizing(converter) {
+    // call the converter's postConversion hook and see if it sanitizes its input
+    return converter.hooks.postConversion("<table>") === "";
   }
 
 
@@ -183,11 +190,8 @@
 
     // we can't just use the same converter that the user passes in, as
     // Pagedown forbids it (doing so could cause an infinite loop)
-    if (!("sanitize" in options) || options.sanitize) {
-      extra.converter = Markdown.getSanitizingConverter(); // default
-    } else {
-      extra.converter = new Markdown.Converter();
-    }
+    extra.converter = isSanitizing(converter) ? Markdown.getSanitizingConverter()
+                                              : new Markdown.Converter();
 
     // Caller usually won't need this, but it's handy for testing.
     return extra;

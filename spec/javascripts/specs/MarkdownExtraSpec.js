@@ -37,8 +37,6 @@ describe("Markdown.Extra", function() {
           "Term 2\n\n" +
           ":   Definition 2\n\n";
 
-
-
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
     "\n\nCool. And a link: [google](http://www.google.com)";
@@ -79,7 +77,7 @@ describe("Markdown.Extra", function() {
       expect(extra.fencedCodeBlocks).wasNotCalled();
     });
 
-    it("should use 'fencedCodeBlocks' extension if specified", function() {
+    it("should use 'fenced_code_gfm' extension if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "fenced_code_gfm"});
       spyOn(extra, "tables").andCallThrough();
       spyOn(extra, "fencedCodeBlocks").andCallThrough();
@@ -124,22 +122,17 @@ describe("Markdown.Extra", function() {
       expect(html).toMatch(/<pre class="prettyprint"><code class="language-foolang">/);
     });
 
-    it("should use sanitizing converter by default for markdown inside tables", function() {
+    it("should use regular converter if specified for markdown inside tables", function() {
       Markdown.Extra.init(converter);
       var html = converter.makeHtml(tableComplex);
-      expect(html).not.toMatch(/<script>/);
+      expect(html).toMatch(/<script>/);
     });
 
     it("should use sanitizing converter if specified for markdown inside tables", function() {
-      Markdown.Extra.init(converter, {sanitize: true});
-      var html = converter.makeHtml(tableComplex);
+      var sconv = Markdown.getSanitizingConverter();
+      Markdown.Extra.init(sconv);
+      var html = sconv.makeHtml(tableComplex);
       expect(html).not.toMatch(/<script>/);
-    });
-
-    it("should use regular converter if specified for markdown inside tables", function() {
-      Markdown.Extra.init(converter, {sanitize: false});
-      var html = converter.makeHtml(tableComplex);
-      expect(html).toMatch(/<script>/);
     });
   });
 

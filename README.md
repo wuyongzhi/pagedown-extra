@@ -63,7 +63,7 @@ will render to something like this depending on how you choose to style it:
 You can also specify a class for the generated tables using
 `Markdown.Extra.init(converter, {table_class: "table table-striped"})` for instance.
 
-Within markdown tables, inline span-level markdown inside of table cells will also be converted.
+Span-level markdown inside of table cells will also be converted.
 
 
 ### [Fenced Code Blocks][6]
@@ -83,8 +83,8 @@ Will be transformed into:
 ```
 
 You can specify a syntax highlighter in the options object passed to `Markdown.Extra.init`,
-in which it will generate html compatible with that highlighter.
-Both [google-code-prettify][3] and [Highlight.js][4] are currently supported:
+in order to generated html compatible with either [google-code-prettify][3]
+or [Highlight.js][4]:
 
 ```javascript
 // highlighter can be either `prettify` or `highlight`

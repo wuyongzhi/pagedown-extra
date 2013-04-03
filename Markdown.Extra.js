@@ -26,7 +26,7 @@
 	    return -1;
 	  }
 	}
-  
+
   function trim(str) {
     return str.replace(/^\s+|\s+$/g, '');
   }
@@ -211,8 +211,6 @@
 
   // Setup state vars, do conversion
   Markdown.Extra.prototype.doConversion = function(transformations, text) {
-    this.hashBlocks = [];
-
     text = processEscapes(text);
 
     if (this.attributeBlocks)

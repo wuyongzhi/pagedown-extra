@@ -17,15 +17,15 @@
 
   // patch for ie7
   if (!Array.indexOf) {
-	  Array.prototype.indexOf = function(obj){
-	    for(var i = 0; i < this.length; i++){
-	      if(this[i] == obj){
-	        return i;
-	      }
-	    }
-	    return -1;
-	  }
-	}
+    Array.prototype.indexOf = function(obj) {
+      for (var i = 0; i < this.length; i++) {
+        if (this[i] == obj) {
+          return i;
+        }
+      }
+      return -1;
+    }
+  }
 
   function trim(str) {
     return str.replace(/^\s+|\s+$/g, '');

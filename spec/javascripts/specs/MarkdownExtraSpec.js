@@ -25,17 +25,31 @@ describe("Markdown.Extra", function() {
   // table containing inline and block-level tags and markdown
   var tableComplex = "h1|h2|h3\n-|-|-\n`code`|##hdr##|<script></script>";
 
+  // markdown for a group of elements using attribute lists
+  var attrList = "``` {#gfm-id .gfm-class}\n" +
+    "var foo = bar;\n" +
+    "```\n\n" +
+    "## A Header {#header-id}\n\n" +
+    "### Another One ### {#header-id .hclass}\n\n" +
+    "Underlined {#what}\n" +
+    "==========\n";
+  // expected output for attribute list markdown
+  var attrListHtml = '<pre id="gfm-id" class="gfm-class"><code>var foo = bar;</code></pre>\n\n' +
+    '<h2 id="header-id">A Header</h2>\n\n' +
+    '<h3 id="header-id" class="hclass">Another One</h3>\n\n' +
+    '<h1 id="what">Underlined</h1>';
+
   var defList = "Term 1\nTerm 2\n:   Def1";
   var defListHtml = "<dl>\n<dt>Term 1</dt>\n<dt>Term 2</dt>\n<dd>Def1</dd>\n</dl>";
   var defListComplex = "Term 1\n\n" +
-          ":   This definition has a code block, a blockquote and a list.\n\n" +
-          "        code block.\n\n" +
-          "    > block quote\n" +
-          "    > on two lines.\n\n" +
-          "    1.  first list item\n" +
-          "    2.  second list item\n\n" +
-          "Term 2\n\n" +
-          ":   Definition 2\n\n";
+    ":   This definition has a code block, a blockquote and a list.\n\n" +
+    "        code block.\n\n" +
+    "    > block quote\n" +
+    "    > on two lines.\n\n" +
+    "    1.  first list item\n" +
+    "    2.  second list item\n\n" +
+    "Term 2\n\n" +
+    ":   Definition 2\n\n";
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
@@ -332,6 +346,11 @@ describe("Markdown.Extra", function() {
         Markdown.Extra.init(converter, {highlighter: "prettify"});
         var html = converter.makeHtml(text);
         expect(html).toMatch(/<pre class="test-class prettyprint">/);
+      });
+
+      it("should work correctly with multiple items", function() {
+        var html = sconv.makeHtml(attrList);
+        expect(html).toEqual(attrListHtml);
       });
     });
   });

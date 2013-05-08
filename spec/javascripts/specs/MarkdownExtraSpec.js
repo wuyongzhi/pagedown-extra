@@ -68,17 +68,27 @@ describe("Markdown.Extra", function() {
 
     it("should default to use 'all' extensions", function() {
       var extra = Markdown.Extra.init(converter);
-      spyOn(extra, "all").andCallThrough();
+      spyOn(extra, "tables").andCallThrough();
+      spyOn(extra, "fencedCodeBlocks").andCallThrough();
+      spyOn(extra, "definitionLists").andCallThrough();
+      spyOn(extra, "hashAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
-      expect(extra.all).toHaveBeenCalled();
+      expect(extra.tables).toHaveBeenCalled();
+      expect(extra.fencedCodeBlocks).wasNotCalled();
+      expect(extra.definitionLists).toHaveBeenCalled();
+      expect(extra.hashAttributeBlocks).toHaveBeenCalled();
     });
 
     it("should use 'all' extensions if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "all"});
-      spyOn(extra, "all").andCallThrough();
+      spyOn(extra, "tables").andCallThrough();
+      spyOn(extra, "fencedCodeBlocks").andCallThrough();
+      spyOn(extra, "definitionLists").andCallThrough();
       spyOn(extra, "hashAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
-      expect(extra.all).toHaveBeenCalled();
+      expect(extra.tables).toHaveBeenCalled();
+      expect(extra.fencedCodeBlocks).wasNotCalled();
+      expect(extra.definitionLists).toHaveBeenCalled();
       expect(extra.hashAttributeBlocks).toHaveBeenCalled();
     });
 

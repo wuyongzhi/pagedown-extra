@@ -163,28 +163,31 @@
     // Each call to init creates a new instance of Markdown.Extra so it's
     // safe to have multiple converters, with different options, on a single page
     var extra = new Markdown.Extra();
-    var transformations = [];
+    var postNormalizationTransformations = [];
+    var preBlockGamutTransformations = [];
 
     options = options || {};
     options.extensions = options.extensions || ["all"];
-    if (contains(options.extensions, "all")) {
-      transformations.push("all");
-      extra.attributeBlocks = true;
-    } else {
-      if (contains(options.extensions, "tables"))
-        transformations.push("tables");
-      if (contains(options.extensions, "fenced_code_gfm"))
-        transformations.push("fencedCodeBlocks");
-      if (contains(options.extensions, "def_list"))
-        transformations.push("definitionLists");
-      if (contains(options.extensions, "attr_list"))
+    if (contains(options.extensions, "all"))
+    	options.extensions = ["tables", "fenced_code_gfm", "def_list", "attr_list"];
+    if (contains(options.extensions, "tables"))
+        preBlockGamutTransformations.push("tables");
+    if (contains(options.extensions, "fenced_code_gfm"))
+    	postNormalizationTransformations.push("fencedCodeBlocks");
+    if (contains(options.extensions, "def_list"))
+        preBlockGamutTransformations.push("definitionLists");
+    if (contains(options.extensions, "attr_list"))
         extra.attributeBlocks = true;
-    }
+    
+
+    converter.hooks.chain("postNormalization", function(text) {
+        return extra.doTransform(postNormalizationTransformations, text);
+    });
 
     // preBlockGamut also gives us access to a hook so we can run the
     // block gamut recursively, however we don't need it at this point
     converter.hooks.chain("preBlockGamut", function(text) {
-      return extra.doConversion(transformations, text);
+      return extra.doConversion(preBlockGamutTransformations, text);
     });
 
     converter.hooks.chain("postConversion", function(text) {
@@ -216,12 +219,17 @@
     if (this.attributeBlocks)
       text = this.hashAttributeBlocks(text);
 
-    for(var i = 0; i < transformations.length; i++)
-      text = this[transformations[i]](text);
-
-    return text + '\n';
+    return this.doTransform(transformations, text);
   };
 
+  // Do transformations
+  Markdown.Extra.prototype.doTransform = function(transformations, text) {
+	  for(var i = 0; i < transformations.length; i++)
+		  text = this[transformations[i]](text);
+	  
+	  return text + '\n';
+  };
+  
   // Clear state vars that may use unnecessary memory. Unhash blocks we
   // stored, apply attribute blocks if necessary, and return converted text.
   Markdown.Extra.prototype.finishConversion = function(text) {
@@ -464,12 +472,6 @@
       return self.hashExtraBlock(html);
     });
 
-    return text;
-  };
-
-  Markdown.Extra.prototype.all = function(text) {
-    text = this.tables(text);
-    text = this.fencedCodeBlocks(text);
     return text;
   };
 

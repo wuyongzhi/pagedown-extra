@@ -75,7 +75,7 @@ describe("Markdown.Extra", function() {
       spyOn(extra, "hashFcbAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.tables).toHaveBeenCalled();
-      expect(extra.fencedCodeBlocks).wasNotCalled();
+      expect(extra.fencedCodeBlocks).toHaveBeenCalled();
       expect(extra.definitionLists).toHaveBeenCalled();
       expect(extra.hashHeaderAttributeBlocks).toHaveBeenCalled();
       expect(extra.hashFcbAttributeBlocks).toHaveBeenCalled();
@@ -90,7 +90,7 @@ describe("Markdown.Extra", function() {
       spyOn(extra, "hashFcbAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.tables).toHaveBeenCalled();
-      expect(extra.fencedCodeBlocks).wasNotCalled();
+      expect(extra.fencedCodeBlocks).toHaveBeenCalled();
       expect(extra.definitionLists).toHaveBeenCalled();
       expect(extra.hashHeaderAttributeBlocks).toHaveBeenCalled();
       expect(extra.hashFcbAttributeBlocks).toHaveBeenCalled();
@@ -121,8 +121,8 @@ describe("Markdown.Extra", function() {
       spyOn(extra, "hashFcbAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.definitionLists).toHaveBeenCalled();
-      expect(extra.hashHeaderAttributeBlocks).toHaveBeenCalled();
-      expect(extra.hashFcbAttributeBlocks).toHaveBeenCalled();
+      expect(extra.hashHeaderAttributeBlocks).wasNotCalled();
+      expect(extra.hashFcbAttributeBlocks).wasNotCalled();
     });
 
     it("should use 'attr_list' extension if specified", function() {

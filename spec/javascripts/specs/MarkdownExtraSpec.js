@@ -71,12 +71,14 @@ describe("Markdown.Extra", function() {
       spyOn(extra, "tables").andCallThrough();
       spyOn(extra, "fencedCodeBlocks").andCallThrough();
       spyOn(extra, "definitionLists").andCallThrough();
-      spyOn(extra, "hashAttributeBlocks").andCallThrough();
+      spyOn(extra, "hashHeaderAttributeBlocks").andCallThrough();
+      spyOn(extra, "hashFcbAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.tables).toHaveBeenCalled();
       expect(extra.fencedCodeBlocks).wasNotCalled();
       expect(extra.definitionLists).toHaveBeenCalled();
-      expect(extra.hashAttributeBlocks).toHaveBeenCalled();
+      expect(extra.hashHeaderAttributeBlocks).toHaveBeenCalled();
+      expect(extra.hashFcbAttributeBlocks).toHaveBeenCalled();
     });
 
     it("should use 'all' extensions if specified", function() {
@@ -84,12 +86,14 @@ describe("Markdown.Extra", function() {
       spyOn(extra, "tables").andCallThrough();
       spyOn(extra, "fencedCodeBlocks").andCallThrough();
       spyOn(extra, "definitionLists").andCallThrough();
-      spyOn(extra, "hashAttributeBlocks").andCallThrough();
+      spyOn(extra, "hashHeaderAttributeBlocks").andCallThrough();
+      spyOn(extra, "hashFcbAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.tables).toHaveBeenCalled();
       expect(extra.fencedCodeBlocks).wasNotCalled();
       expect(extra.definitionLists).toHaveBeenCalled();
-      expect(extra.hashAttributeBlocks).toHaveBeenCalled();
+      expect(extra.hashHeaderAttributeBlocks).toHaveBeenCalled();
+      expect(extra.hashFcbAttributeBlocks).toHaveBeenCalled();
     });
 
     it("should use 'tables' extension if specified", function() {
@@ -113,18 +117,22 @@ describe("Markdown.Extra", function() {
     it("should use 'def_list' extension if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "def_list"});
       spyOn(extra, "definitionLists").andCallThrough();
-      spyOn(extra, "hashAttributeBlocks").andCallThrough();
+      spyOn(extra, "hashHeaderAttributeBlocks").andCallThrough();
+      spyOn(extra, "hashFcbAttributeBlocks").andCallThrough();
       converter.makeHtml(markdown);
       expect(extra.definitionLists).toHaveBeenCalled();
-      expect(extra.hashAttributeBlocks).wasNotCalled();
+      expect(extra.hashHeaderAttributeBlocks).toHaveBeenCalled();
+      expect(extra.hashFcbAttributeBlocks).toHaveBeenCalled();
     });
 
     it("should use 'attr_list' extension if specified", function() {
       var extra = Markdown.Extra.init(converter, {extensions: "attr_list"});
-      spyOn(extra, "hashAttributeBlocks").andCallThrough();
+      spyOn(extra, "hashHeaderAttributeBlocks").andCallThrough();
+      spyOn(extra, "hashFcbAttributeBlocks").andCallThrough();
       spyOn(extra, "definitionLists").andCallThrough();
       converter.makeHtml(markdown);
-      expect(extra.hashAttributeBlocks).toHaveBeenCalled();
+      expect(extra.hashHeaderAttributeBlocks).toHaveBeenCalled();
+      expect(extra.hashFcbAttributeBlocks).toHaveBeenCalled();
       expect(extra.definitionLists).wasNotCalled();
     });
 

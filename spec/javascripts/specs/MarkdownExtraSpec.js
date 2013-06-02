@@ -44,7 +44,7 @@ describe("Markdown.Extra", function() {
   var defListHtml = "<dl>\n<dt>Term 1</dt>\n<dt>Term 2</dt>\n<dd>Def1</dd>\n</dl>";
   var defListComplex = "Term 1\n\n" +
     ":   This definition has a code block, a blockquote and a list.\n\n" +
-    "        code block.\n\n" +
+    "        code block: { int *p; }\n\n" +
     "    > block quote\n" +
     "    > on two lines.\n\n" +
     "    1.  first list item\n" +
@@ -329,7 +329,7 @@ describe("Markdown.Extra", function() {
 
       it("should convert block-level elements in definitions", function() {
         var html = sconv.makeHtml(defListComplex);
-        expect(html).toMatch(/<pre><code>[\s\S]*<blockquote>[\s\S]*<ol>/);
+        expect(html).toMatch(/<pre><code>code block: { int \*p; }[\s\S]*<blockquote>[\s\S]*<ol>/);
       });
 
       it("should not convert a list with multiple defs into multiple lists", function() {

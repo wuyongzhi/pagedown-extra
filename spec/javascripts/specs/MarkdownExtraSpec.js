@@ -6,6 +6,7 @@ describe("Markdown.Extra", function() {
 
   // basic table
   var table = "h1 | h2 | h3\n:- | :-: | -:\n1 | 2 | 3";
+  var tableWithRefLinks = "h1 | [link1][1] | h3\n:- | :-: | -:\n1 | [link2][2] | 3\n\n  [1]: http://link1.com\n  [2]: http://link2.com";
   var tableVerbose = "| h1 | h2 | h3 |\n| :- | :-: | -: |\n| 1 | 2 | 3 |";
   // expected table html
   var tableHtml ='<table>\n' +
@@ -50,6 +51,11 @@ describe("Markdown.Extra", function() {
     "    2.  second list item\n\n" +
     "Term 2\n\n" +
     ":   Definition 2\n\n";
+  var defListNested = "Term 1\n\n" +
+  ":   This definition has a nested definition.\n\n" +
+  "    :   Nested definition\n\n" +
+  "Term 2\n\n" +
+  ":   Definition 2\n\n";
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
@@ -285,6 +291,11 @@ describe("Markdown.Extra", function() {
         var html = sconv.makeHtml(text);
         expect(html).toMatch(/<table>[\s\S]*~[\s\S]*\$[\s\S]*<\/table>/);
       });
+      
+      it("should convert reference links", function() {
+      	var html = sconv.makeHtml(tableWithRefLinks);
+      	expect(html).toMatch(/<table>[\s\S]*<a href=[\s\S]*<a href=[\s\S]*<\/table>/);
+      });
     });
 
     describe("with definition lists", function() {
@@ -326,6 +337,12 @@ describe("Markdown.Extra", function() {
         var matches = html.match(/<dl>/g);
         expect(matches.length).toEqual(1);
       });
+      
+      it("should convert nested definitions", function() {
+        var html = sconv.makeHtml(defListNested);
+      	expect(html).toMatch(/<dd>\s*<dl>\s*<dt>/);
+      });
+
     });
 
     describe("with attribute lists", function() {

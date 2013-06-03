@@ -1,8 +1,8 @@
 describe("Markdown.Extra", function() {
   // basic code block
-  var codeBlock = "```foolang\nfoo=bar;\n```";
+  var codeBlock = "```foolang\nfoo=$bar;\n```";
   // expected code block html
-  var codeBlockHtml ='<pre><code class="foolang">foo=bar;</code></pre>';
+  var codeBlockHtml ='<pre><code class="foolang">foo=$bar;</code></pre>';
 
   // basic table
   var table = "h1 | h2 | h3\n:- | :-: | -:\n1 | 2 | 3";

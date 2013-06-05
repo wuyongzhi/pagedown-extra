@@ -293,8 +293,8 @@ describe("Markdown.Extra", function() {
       });
       
       it("should convert reference links", function() {
-      	var html = sconv.makeHtml(tableWithRefLinks);
-      	expect(html).toMatch(/<table>[\s\S]*<a href=[\s\S]*<a href=[\s\S]*<\/table>/);
+        var html = sconv.makeHtml(tableWithRefLinks);
+        expect(html).toMatch(/<table>[\s\S]*<a href=[\s\S]*<a href=[\s\S]*<\/table>/);
       });
     });
 
@@ -340,7 +340,7 @@ describe("Markdown.Extra", function() {
       
       it("should convert nested definitions", function() {
         var html = sconv.makeHtml(defListNested);
-      	expect(html).toMatch(/<dd>\s*<dl>\s*<dt>/);
+        expect(html).toMatch(/<dd>\s*<dl>\s*<dt>/);
       });
 
     });

@@ -57,6 +57,19 @@ describe("Markdown.Extra", function() {
   "Term 2\n\n" +
   ":   Definition 2\n\n";
 
+  var footnotes = "Here is a footnote[^footnote].\n\n  [^footnote]: Here is the *text* of the **footnote**.";
+  var footnotesHtml = '<p>Here is a footnote'
+      + '<a href="#fn:footnote" id="fnref:footnote" title="See footnote" class="footnote">1</a>'
+      + '.</p>\n\n'
+      + '<div class="footnotes">\n<hr>\n'
+      + '<ol>\n\n<li id="fn:footnote">'
+      + 'Here is the <em>text</em> of the <strong>footnote</strong>. '
+      + '<a href="#fnref:footnote" title="Return to article" class="reversefootnote">&#8617;</a></li>\n\n</ol>\n</div>';
+  var footnotesComplex = "Here is one footnote[^footnote1].\n\n"
+      + "Here is a second one[^footnote2].\n\n"
+      + "   [^footnote1]: footnote1.\n\nParagraph\n\n"
+      + "[^footnote2]: footnote2.";
+
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
     "\n\nCool. And a link: [google](http://www.google.com)";
@@ -345,6 +358,24 @@ describe("Markdown.Extra", function() {
 
     });
 
+    describe("with footnotes", function() {
+      beforeEach(function() {
+        sconv = Markdown.getSanitizingConverter();
+        Markdown.Extra.init(sconv, {extensions: "footnotes"});
+      });
+      
+      it("should convert one footnote properly", function() {
+        var html = strip(sconv.makeHtml(footnotes));
+        expect(html).toEqual(footnotesHtml);
+      });
+      
+      it("should convert multiple footnotes properly", function() {
+        var html = strip(sconv.makeHtml(footnotesComplex));
+        expect(html).toMatch(/<p>.+<a[\s\S]+<p>.+<a[\s\S]+<p>[\s\S]+<div[\s\S]+<hr>\s+<ol>\s+<li.+<a[\s\S]+<li.+<a/);
+      });
+      
+    });
+    
     describe("with attribute lists", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();
@@ -375,6 +406,29 @@ describe("Markdown.Extra", function() {
         expect(html).toMatch(/<pre id="awesome" class="prettyprint foo">/);
       });
 
+      it("should correctly apply attributes to headers mixed with fenced code blocks", function() {
+        var hdrBlock1 = "Hello There {#header-id1 .class1}\n=========";
+        var hdrBlock2 = "## Hello There {#header-id2 .class1}";
+        var hdrBlock3 = "## Hello There ##  {#header-id3 .class1}";
+        var text1 = "```\nfoo=bar;\n  var x;\n\n```";
+        var text2 = "```foolang\nfoo=bar;\n```";
+        var html = sconv.makeHtml(hdrBlock1 + "\n\n" + text1 + "\n\n" + hdrBlock2 + "\n\n" + text2 + "\n\n" + hdrBlock3);
+        expect(html).toMatch(/<h1 id="header-id1" class="class1">/);
+        expect(html).toMatch(/<h2 id="header-id2" class="class1">/);
+        expect(html).toMatch(/<h2 id="header-id3" class="class1">/);
+      });
+      
+      it("should correctly apply attributes to fenced code blocks mixed with headers", function() {
+        var hdrBlock1 = "Hello There\n=========";
+        var hdrBlock2 = "## Hello There";
+        var hdrBlock3 = "## Hello There ##";
+        var text1 = "```\t{.test-class #test-id} \nfoo=bar;\n  var x;\n\n```";
+        var text2 = "```foolang {.prettyprint .foo #awesome}\nfoo=bar;\n```";
+        var html = sconv.makeHtml(hdrBlock1 + "\n\n" + text1 + "\n\n" + hdrBlock2 + "\n\n" + text2 + "\n\n" + hdrBlock3);
+        expect(html).toMatch(/<pre id="test-id" class="test-class">/);
+        expect(html).toMatch(/<pre id="awesome" class="prettyprint foo">/);
+      });
+      
       it("should merge classes with preexisting classes", function() {
         var text = "```foolang  {.test-class .prettyprint} \n\n foo=bar; \n\n```";
         var converter = Markdown.getSanitizingConverter();

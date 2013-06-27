@@ -1,6 +1,6 @@
 #Overview
 
-This is a collection of [Pagedown][2] plugins to enable support for 
+This is a collection of [Pagedown][1] plugins to enable support for 
 Markdown Extra syntax. Open `demo/demo.html` to try it yourself.
 To run the tests, just open `spec/SpecRunner.html` in your browser. Or, to
 run a browser-less test from the command line as travis-ci would, run `bundle install` followed
@@ -40,7 +40,7 @@ Markdown.Extra.init(converter, {extensions: ["tables", "fenced_code_gfm", "def_l
 See the Extension/Option Reference below for a complete list.
 
 
-### [Tables][5]
+### [Tables][2]
 
 The following markdown:
 
@@ -66,7 +66,7 @@ You can also specify a class for the generated tables using
 Span-level markdown inside of table cells will also be converted.
 
 
-### [Fenced Code Blocks][6]
+### [Fenced Code Blocks][3]
 
 Fenced code blocks are supported &agrave; la GitHub. This markdown:
 
@@ -83,8 +83,8 @@ Will be transformed into:
 ```
 
 You can specify a syntax highlighter in the options object passed to `Markdown.Extra.init`,
-in order to generated html compatible with either [google-code-prettify][3]
-or [Highlight.js][4]:
+in order to generated html compatible with either [google-code-prettify][4]
+or [Highlight.js][5]:
 
 ```javascript
 // highlighter can be either `prettify` or `highlight`
@@ -111,7 +111,7 @@ Would generate the following html:
 ```
 
 
-### [Definition Lists][7]
+### [Definition Lists][6]
 
 ```markdown
 Term 1
@@ -143,7 +143,29 @@ becomes:
 Definitions can contain both inline and block-level markdown.
 
 
-## [Special Attributes][8]
+### [Footnotes][7]
+
+```markdown
+Here is a footnote[^footnote].
+
+  [^footnote]: Here is the *text* of the **footnote**.
+```
+
+becomes:
+
+```html
+<p>Here is a footnote<a href="#fn:footnote" id="fnref:footnote" title="See footnote" class="footnote">1</a>.</p>
+
+<div class="footnotes">
+<hr>
+<ol>
+<li id="fn:footnote">Here is the <em>text</em> of the <strong>footnote</strong>. <a href="#fnref:footnote" title="Return to article" class="reversefootnote">↩</a></li>
+</ol>
+</div>
+```
+
+
+### [Special Attributes][8]
 
 You can add class and id attributes to headers and gfm fenced code blocks.
 
@@ -172,6 +194,7 @@ same naming scheme as the excellent Python Markdown library.
 | tables          | Pretty tables! |
 | def_list        | Definition lists |
 | attr_list       | Special attributes list for headers and fenced code blocks |
+| footnotes       | Footnotes |
 | *smart_strong*  | No strong emphasis in the middle of words |
 | *abbr*          | Abbreviations |
 | *fenced_code*   | PHP Markdown Extra fenced code blocks |
@@ -183,7 +206,7 @@ same naming scheme as the excellent Python Markdown library.
 
 *Italicized extensions are planned, and will be added in roughly the order shown*
 
-See PHP Markdown Extra's [documentation][1] for a more complete overview
+See PHP Markdown Extra's [documentation][9] for a more complete overview
 of syntax. In situations where it differs from how things are done on GitHub --
 alignment of table headers, for instance -- I've chosen compatibility with gfm, which
 seems to be quickly becoming the most widely used markdown implementation.
@@ -200,11 +223,13 @@ the extent of code blocks and definition lists.
 
 See LICENSE.txt 
 
-[1]: http://michelf.ca/projects/php-markdown/extra/#table "Markdown Extra Table Documentation"
-[2]: http://code.google.com/p/pagedown/ "Pagedown - Google Code"
-[3]: http://code.google.com/p/google-code-prettify/ "Prettify"
-[4]: http://softwaremaniacs.org/soft/highlight/en/ "HighlightJs"
-[5]: http://michelf.ca/projects/php-markdown/extra/#table
-[6]: http://github.github.com/github-flavored-markdown/
-[7]: http://michelf.ca/projects/php-markdown/extra/#def-list
-[8]: http://michelf.ca/projects/php-markdown/extra/#spe-attr
+
+  [1]: http://code.google.com/p/pagedown/ "Pagedown - Google Code"
+  [2]: http://michelf.ca/projects/php-markdown/extra/#table
+  [3]: http://github.github.com/github-flavored-markdown/
+  [4]: http://code.google.com/p/google-code-prettify/ "Prettify"
+  [5]: http://softwaremaniacs.org/soft/highlight/en/ "HighlightJs"
+  [6]: http://michelf.ca/projects/php-markdown/extra/#def-list
+  [7]: https://github.com/fletcher/MultiMarkdown/blob/master/Documentation/MultiMarkdown%20User%27s%20Guide.md#footnotes
+  [8]: http://michelf.ca/projects/php-markdown/extra/#spe-attr
+  [9]: http://michelf.ca/projects/php-markdown/extra/#table "Markdown Extra Table Documentation"

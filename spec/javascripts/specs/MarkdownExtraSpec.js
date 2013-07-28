@@ -59,11 +59,19 @@ describe("Markdown.Extra", function() {
 
   var footnotes = "Here is a footnote[^footnote].\n\n  [^footnote]: Here is the *text* of the **footnote**.";
   var footnotesHtml = '<p>Here is a footnote'
+    + '<a href="#fn:footnote" id="fnref:footnote" title="See footnote" class="footnote">1</a>'
+    + '.</p>\n\n'
+    + '<div class="footnotes">\n<hr>\n'
+    + '<ol>\n\n<li id="fn:footnote">'
+    + 'Here is the <em>text</em> of the <strong>footnote</strong>. '
+    + '<a href="#fnref:footnote" title="Return to article" class="reversefootnote">&#8617;</a></li>\n\n</ol>\n</div>';
+  var footnotesNested = "Here is a footnote[^footnote].\n\n  [^footnote]: [^footnote].";
+  var footnotesNestedHtml = '<p>Here is a footnote'
       + '<a href="#fn:footnote" id="fnref:footnote" title="See footnote" class="footnote">1</a>'
       + '.</p>\n\n'
       + '<div class="footnotes">\n<hr>\n'
       + '<ol>\n\n<li id="fn:footnote">'
-      + 'Here is the <em>text</em> of the <strong>footnote</strong>. '
+      + '[^footnote]. '
       + '<a href="#fnref:footnote" title="Return to article" class="reversefootnote">&#8617;</a></li>\n\n</ol>\n</div>';
   var footnotesComplex = "Here is one footnote[^footnote1].\n\n"
       + "Here is a second one[^footnote2].\n\n"
@@ -367,6 +375,11 @@ describe("Markdown.Extra", function() {
       it("should convert one footnote properly", function() {
         var html = strip(sconv.makeHtml(footnotes));
         expect(html).toEqual(footnotesHtml);
+      });
+      
+      it("should not convert nested footnote", function() {
+        var html = strip(sconv.makeHtml(footnotesNested));
+        expect(html).toEqual(footnotesNestedHtml);
       });
       
       it("should convert multiple footnotes properly", function() {

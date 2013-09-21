@@ -175,17 +175,18 @@
     if (contains(options.extensions, "all")) {
       options.extensions = ["tables", "fenced_code_gfm", "def_list", "attr_list", "footnotes"];
     }
+    preBlockGamutTransformations.push("wrapHeaders");
     if (contains(options.extensions, "attr_list")) {
       postNormalizationTransformations.push("hashFcbAttributeBlocks");
       preBlockGamutTransformations.push("hashHeaderAttributeBlocks");
       postConversionTransformations.push("applyAttributeBlocks");
       extra.attributeBlocks = true;
     }
-    if (contains(options.extensions, "tables")) {
-      preBlockGamutTransformations.push("tables");
-    }
     if (contains(options.extensions, "fenced_code_gfm")) {
       postNormalizationTransformations.push("fencedCodeBlocks");
+    }
+    if (contains(options.extensions, "tables")) {
+      preBlockGamutTransformations.push("tables");
     }
     if (contains(options.extensions, "def_list")) {
       preBlockGamutTransformations.push("definitionLists");
@@ -265,6 +266,17 @@
       }
     }
     recursiveUnHash();
+    return text;
+  };
+  
+  // Wrap headers to make sure they won't be in def lists
+  Markdown.Extra.prototype.wrapHeaders = function(text) {
+    function wrap(text) {
+      return '\n' + text + '\n';
+    }
+    text = text.replace(/^.+[ \t]*\n=+[ \t]*\n+/gm, wrap);
+    text = text.replace(/^.+[ \t]*\n-+[ \t]*\n+/gm, wrap);
+    text = text.replace(/^\#{1,6}[ \t]*.+?[ \t]*\#*\n+/gm, wrap);
     return text;
   };
 

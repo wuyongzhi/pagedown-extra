@@ -56,6 +56,7 @@ describe("Markdown.Extra", function() {
   "    :   Nested definition\n\n" +
   "Term 2\n\n" +
   ":   Definition 2\n\n";
+  var defListTitle = "#Title1\nTerm 1\nTerm 2\n:   Def1";
 
   var footnotes = "Here is a footnote[^footnote].\n\n  [^footnote]: Here is the *text* of the **footnote**.";
   var footnotesHtml = '<p>Here is a footnote'
@@ -362,6 +363,11 @@ describe("Markdown.Extra", function() {
       it("should convert nested definitions", function() {
         var html = sconv.makeHtml(defListNested);
         expect(html).toMatch(/<dd>\s*<dl>\s*<dt>/);
+      });
+      
+      it("should convert title before definitions", function() {
+        var html = sconv.makeHtml(defListTitle);
+        expect(html).toMatch(/<h1>[\s\S]*<dl>/);
       });
 
     });

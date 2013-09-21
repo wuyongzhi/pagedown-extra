@@ -506,7 +506,7 @@
       var id = slugify(m1);
       var footnote = self.footnotes[id];
       if (footnote === undefined) {
-        return "";
+        return wholeMatch;
       }
       footnoteCounter++;
       self.usedFootnotes.push(id);

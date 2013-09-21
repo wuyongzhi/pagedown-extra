@@ -75,9 +75,10 @@ describe("Markdown.Extra", function() {
       + '[^footnote]. '
       + '<a href="#fnref:footnote" title="Return to article" class="reversefootnote">&#8617;</a></li>\n\n</ol>\n</div>';
   var footnotesComplex = "Here is one footnote[^footnote1].\n\n"
-      + "Here is a second one[^footnote2].\n\n"
-      + "   [^footnote1]: footnote1.\n\nParagraph\n\n"
-      + "[^footnote2]: footnote2.";
+    + "Here is a second one[^footnote2].\n\n"
+    + "   [^footnote1]: footnote1.\n\nParagraph\n\n"
+    + "[^footnote2]: footnote2.";
+  var undefinedFootnote = "[^abc]";
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
@@ -391,6 +392,11 @@ describe("Markdown.Extra", function() {
       it("should convert multiple footnotes properly", function() {
         var html = strip(sconv.makeHtml(footnotesComplex));
         expect(html).toMatch(/<p>.+<a[\s\S]+<p>.+<a[\s\S]+<p>[\s\S]+<div[\s\S]+<hr>\s+<ol>\s+<li.+<a[\s\S]+<li.+<a/);
+      });
+      
+      it("should not convert undefined footnote", function() {
+        var html = strip(sconv.makeHtml(undefinedFootnote));
+        expect(html).toMatch(/[^abc]/);
       });
       
     });

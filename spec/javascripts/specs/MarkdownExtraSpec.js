@@ -84,7 +84,7 @@ describe("Markdown.Extra", function() {
   var smartypantsQuotesHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
   var smartypantsBackticks = "``Isn't this fun?''";
   var smartypantsBackticksHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
-  var smartypantsSingleBackticks = "'Isn't this fun?'";
+  var smartypantsSingleBackticks = "`Isn't this fun?'";
   var smartypantsSingleBackticksHtml = "<p>&#8216;Isn&#8217;t this fun?&#8217;</p>";
   var smartypantsDash = "This -- is an en-dash and this --- is an em-dash";
   var smartypantsDashHtml = "<p>This &#8211; is an en-dash and this &#8212; is an em-dash</p>";

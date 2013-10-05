@@ -79,6 +79,17 @@ describe("Markdown.Extra", function() {
     + "   [^footnote1]: footnote1.\n\nParagraph\n\n"
     + "[^footnote2]: footnote2.";
   var undefinedFootnote = "[^abc]";
+  
+  var smartypantsQuotes = "\"Isn't this fun?\"";
+  var smartypantsQuotesHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
+  var smartypantsBackticks = "``Isn't this fun?''";
+  var smartypantsBackticksHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
+  var smartypantsSingleBackticks = "'Isn't this fun?'";
+  var smartypantsSingleBackticksHtml = "<p>&#8216;Isn&#8217;t this fun?&#8217;</p>";
+  var smartypantsDash = "This -- is an en-dash and this --- is an em-dash";
+  var smartypantsDashHtml = "<p>This &#8211; is an en-dash and this &#8212; is an em-dash</p>";
+  var smartypantsInCode = "`\"Isn't this fun?\"`";
+  var smartypantsInCodeHtml = "<p><code>\"Isn't this fun?\"</code></p>";
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
@@ -399,6 +410,39 @@ describe("Markdown.Extra", function() {
         expect(html).toMatch(/[^abc]/);
       });
       
+    });
+    
+    describe("with SmartyPants", function() {
+      beforeEach(function() {
+        sconv = Markdown.getSanitizingConverter();
+        Markdown.Extra.init(sconv, {extensions: "smartypants"});
+      });
+      
+      it("should convert quotes properly", function() {
+        var html = strip(sconv.makeHtml(smartypantsQuotes));
+        expect(html).toEqual(smartypantsQuotesHtml);
+      });
+
+      it("should convert backticks properly", function() {
+        var html = strip(sconv.makeHtml(smartypantsBackticks));
+        expect(html).toEqual(smartypantsBackticksHtml);
+      });
+
+      it("should convert single backticks properly", function() {
+        var html = strip(sconv.makeHtml(smartypantsSingleBackticks));
+        expect(html).toEqual(smartypantsSingleBackticksHtml);
+      });
+
+      it("should convert single dash properly", function() {
+        var html = strip(sconv.makeHtml(smartypantsDash));
+        expect(html).toEqual(smartypantsDashHtml);
+      });
+
+      it("should not perform SmartyPants in code", function() {
+        var html = strip(sconv.makeHtml(smartypantsInCode));
+        expect(html).toEqual(smartypantsInCodeHtml);
+      });
+
     });
     
     describe("with attribute lists", function() {

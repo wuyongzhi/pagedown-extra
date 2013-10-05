@@ -173,7 +173,7 @@
     options = options || {};
     options.extensions = options.extensions || ["all"];
     if (contains(options.extensions, "all")) {
-      options.extensions = ["tables", "fenced_code_gfm", "def_list", "attr_list", "footnotes"];
+      options.extensions = ["tables", "fenced_code_gfm", "def_list", "attr_list", "footnotes", "smartypants"];
     }
     preBlockGamutTransformations.push("wrapHeaders");
     if (contains(options.extensions, "attr_list")) {
@@ -195,6 +195,9 @@
       postNormalizationTransformations.push("stripFootnoteDefinitions");
       preBlockGamutTransformations.push("doFootnotes");
       postConversionTransformations.push("printFootnotes");
+    }
+    if (contains(options.extensions, "smartypants")) {
+      postConversionTransformations.push("runSmartyPants");
     }
     
     converter.hooks.chain("postNormalization", function(text) {
@@ -590,6 +593,71 @@
   };
 
 
+  /******************************************************************
+  * SmartyPants                                                     *
+  ******************************************************************/
+  
+  var educatePants = function(wholeMatch,m1,m2,m3,m4,m5,m6) {
+    var blockText = m5;
+    var blockOffset = 0;
+    var newBlockText = '';
+    blockText.replace(/(<)([a-zA-Z1-6]*)([^\n>]?)(>)(.*?)(<\/\2>)/mg, function(wholeMatch,m1,m2,m3,m4,m5,m6,offset) {
+      newBlockText += applyPants(blockText.substring(blockOffset, offset)) + educatePants(wholeMatch,m1,m2,m3,m4,m5,m6);
+      blockOffset = offset + wholeMatch.length;
+    });
+    newBlockText += applyPants(blockText.substring(blockOffset));
+    return m1 + m2 + m3 + m4 + newBlockText + m6;
+  };
+    
+  function reversePants(wholeMatch, m1) {
+    var blockText = m1;
+    blockText = blockText.replace(/&\#8220;/g, "\"");
+    blockText = blockText.replace(/&\#8221;/g, "\"");
+    blockText = blockText.replace(/&\#8216;/g, "'");
+    blockText = blockText.replace(/&\#8217;/g, "'");
+    blockText = blockText.replace(/&\#8212;/g, "--");
+    blockText = blockText.replace(/&\#8211;/g, "---");
+    blockText = blockText.replace(/&\#8230;/g, "...");
+    return blockText;
+  }
+  
+  function applyPants(text) {
+    text = text.replace(/``/g, "&#8220;").replace (/''/g, "&#8221;");
+    text = text.replace(/---/g, "&#8212;").replace(/--/g, "&#8211;");
+    text = text.replace(/\.\.\./g, "&#8230;").replace(/\.\s\.\s\./g, "&#8230;");
+    
+    text = text.replace (/^'(?=[!"#\$\%'()*+,\-.\/:;<=>?\@\[\\]\^_`{|}~]\B)/g, "&#8216;");
+    text = text.replace (/^"(?=[!"#\$\%'()*+,\-.\/:;<=>?\@\[\\]\^_`{|}~]\B)/g, "&#8220;");
+    text = text.replace(/^"(?=\w)/g, "&#8220;");
+    text = text.replace(/^'(?=\w)/g, "&#8216;");
+
+    text = text.replace(/"'(?=\w)/g, "&#8220;&#8216;");
+    text = text.replace(/'"(?=\w)/g, "&#8216;&#8220;");
+
+    // Special case for decade abbreviations (the '80s):
+    text = text.replace(/'(?=\d{2}s)/g, "&#8217;");
+    text = text.replace(/(>|\t|\n|\s|&nbsp;|--|&[mn]dash;|&\#8211;|&\#8212;|&\#x201[34];)'(?=\w)/g, "$1&#8216;");
+    text = text.replace(/([^<>\\ \t\r\n\[\{\(\-])'(?=\s | s\b)/g, "$1&#8217;");
+
+    // Any remaining single quotes should be opening ones:
+    text = text.replace(/'/g, "&#8217;");
+    text = text.replace(/(>|\t|\n|\s|&nbsp;|--|&[mn]dash;|&\#8211;|&\#8212;|&\#x201[34];)"(?=\w)/g, "$1&#8220;");
+    text = text.replace(/([^<>\\ \t\r\n\[\{\(\-])"(?=\s | s\b)/g, "$1&#8221;");
+    
+    text = text.replace(/"/ig, "&#8221;");
+    return text;
+  }
+
+  // Find and convert markdown extra definition lists into html.
+  Markdown.Extra.prototype.runSmartyPants = function(text) {
+    text = text.replace(/(<)([a-zA-Z1-6]+)([^\n>]*?)(>)(.*?)(<\/\2>)/gm, educatePants);
+    //clean everything inside html tags
+    text = text.replace(/(<([a-zA-Z1-6]+)\b([^\n>]*?)(\/)?>)/g, reversePants);
+    //clean out replacements inside special tags
+    text = text.replace(/((<)(code|kbd|pre|script|noscript|iframe|math|ins|del|pre)(.?)(>)(.*?)(<\/)(code|kbd|pre|script|noscript|iframe|math|ins|del|pre)(>))/gm, reversePants);
+    return text;
+  };
+  
   /******************************************************************
   * Definition Lists                                                *
   ******************************************************************/

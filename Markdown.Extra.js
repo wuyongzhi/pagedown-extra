@@ -615,8 +615,8 @@
     blockText = blockText.replace(/&\#8221;/g, "\"");
     blockText = blockText.replace(/&\#8216;/g, "'");
     blockText = blockText.replace(/&\#8217;/g, "'");
-    blockText = blockText.replace(/&\#8212;/g, "--");
-    blockText = blockText.replace(/&\#8211;/g, "---");
+    blockText = blockText.replace(/&\#8212;/g, "---");
+    blockText = blockText.replace(/&\#8211;/g, "--");
     blockText = blockText.replace(/&\#8230;/g, "...");
     return blockText;
   }

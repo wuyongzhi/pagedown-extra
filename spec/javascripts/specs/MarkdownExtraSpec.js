@@ -88,8 +88,8 @@ describe("Markdown.Extra", function() {
   var smartypantsSingleBackticksHtml = "<p>&#8216;Isn&#8217;t this fun?&#8217;</p>";
   var smartypantsDash = "This -- is an en-dash and this --- is an em-dash";
   var smartypantsDashHtml = "<p>This &#8211; is an en-dash and this &#8212; is an em-dash</p>";
-  var smartypantsInCode = "`\"Isn't this fun?\"`";
-  var smartypantsInCodeHtml = "<p><code>\"Isn't this fun?\"</code></p>";
+  var smartypantsInCode = "`\"Isn't this fun?\"` and `This -- is an en-dash and this --- is an em-dash`";
+  var smartypantsInCodeHtml = "<p><code>\"Isn't this fun?\"</code> and <code>This -- is an en-dash and this --- is an em-dash</code></p>";
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +

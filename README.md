@@ -182,6 +182,18 @@ You can add class and id attributes to headers and gfm fenced code blocks.
     ==========
 
 
+### [SmartyPants][9]
+
+SmartyPants extension converts ASCII punctuation characters into "smart" typographic punctuation HTML entities. For example:
+
+|                  |                                                    |                                     |
+ ------------------|----------------------------------------------------|-------------------------------------
+| Single backticks | `'Isn't this fun?'`                                | &#8216;Isn&#8217;t this fun?&#8217; |
+| Quotes           | `"Isn't this fun?"`                                | &#8220;Isn&#8217;t this fun?&#8221; |
+| Dashes           | `This -- is an en-dash and this --- is an em-dash` | This &#8211; is an en-dash and this &#8212; is an em-dash |
+
+
+
 ## Extension / Option Reference
 You can enable all of the currently supported extensions with `{extensions: "all"}`. This is also
 the default. If specifying multiple extensions, you must provide them as an array. Here
@@ -195,6 +207,7 @@ same naming scheme as the excellent Python Markdown library.
 | def_list        | Definition lists |
 | attr_list       | Special attributes list for headers and fenced code blocks |
 | footnotes       | Footnotes |
+| smartypants     | SmartyPants |
 | *smart_strong*  | No strong emphasis in the middle of words |
 | *abbr*          | Abbreviations |
 | *fenced_code*   | PHP Markdown Extra fenced code blocks |
@@ -206,7 +219,7 @@ same naming scheme as the excellent Python Markdown library.
 
 *Italicized extensions are planned, and will be added in roughly the order shown*
 
-See PHP Markdown Extra's [documentation][9] for a more complete overview
+See PHP Markdown Extra's [documentation][10] for a more complete overview
 of syntax. In situations where it differs from how things are done on GitHub --
 alignment of table headers, for instance -- I've chosen compatibility with gfm, which
 seems to be quickly becoming the most widely used markdown implementation.
@@ -232,4 +245,5 @@ See LICENSE.txt
   [6]: http://michelf.ca/projects/php-markdown/extra/#def-list
   [7]: https://github.com/fletcher/MultiMarkdown/blob/master/Documentation/MultiMarkdown%20User%27s%20Guide.md#footnotes
   [8]: http://michelf.ca/projects/php-markdown/extra/#spe-attr
-  [9]: http://michelf.ca/projects/php-markdown/extra/#table "Markdown Extra Table Documentation"
+  [9]: http://daringfireball.net/projects/smartypants/
+  [10]: http://michelf.ca/projects/php-markdown/extra/#table "Markdown Extra Table Documentation"

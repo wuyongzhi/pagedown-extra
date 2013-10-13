@@ -186,7 +186,7 @@ You can add class and id attributes to headers and gfm fenced code blocks.
 
 SmartyPants extension converts ASCII punctuation characters into "smart" typographic punctuation HTML entities. For example:
 
-|                  |                                                    |                                     |
+|                  | ASCII                                              | HTML                                |
  ------------------|----------------------------------------------------|-------------------------------------
 | Single backticks | `'Isn't this fun?'`                                | &#8216;Isn&#8217;t this fun?&#8217; |
 | Quotes           | `"Isn't this fun?"`                                | &#8220;Isn&#8217;t this fun?&#8221; |

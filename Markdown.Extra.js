@@ -598,18 +598,19 @@
   ******************************************************************/
   
   var educatePants = function(text) {
+    var result = '';
+    var blockOffset = 0;
     // Here we parse HTML in a very bad manner
-    return text.replace(/([\s\S]*?)(?:<([a-zA-Z1-6]+)([^\n]*?>)([\s\S]*?)(<\/\2>)|$)/g, function(wholeMatch, m1, m2, m3, m4, m5, offset) {
-      var result = applyPants(m1);
-      if(m2 !== undefined) {
-        // Skip special tags
-        if(!/code|kbd|pre|script|noscript|iframe|math|ins|del|pre/i.test(m2)) {
-          m4 = educatePants(m4);
-        }
-        result += '<' + m2 + m3 + m4 + m5;
+    text.replace(/(<)([a-zA-Z1-6]+)([^\n]*?>)([\s\S]*?)(<\/\2>)/g, function(wholeMatch, m1, m2, m3, m4, m5, offset) {
+      result += applyPants(text.substring(blockOffset, offset));
+      blockOffset = offset + wholeMatch.length;
+      // Skip special tags
+      if(!/code|kbd|pre|script|noscript|iframe|math|ins|del|pre/i.test(m2)) {
+        m4 = educatePants(m4);
       }
-      return result;
+      result += m1 + m2 + m3 + m4 + m5;
     });
+    return result + applyPants(text.substring(blockOffset));
   };
     
   function revertPants(wholeMatch, m1) {

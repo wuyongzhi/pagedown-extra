@@ -597,20 +597,19 @@
   * SmartyPants                                                     *
   ******************************************************************/
   
-  var educatePants = function(wholeMatch,m1,m2,m3,m4,m5,m6) {
-    // Skip special tags
-    if(/code|kbd|pre|script|noscript|iframe|math|ins|del|pre/i.test(m2)) {
-      return wholeMatch;
-    }
-    var blockText = m5;
-    var blockOffset = 0;
-    var newBlockText = '';
-    blockText.replace(/(<)([a-zA-Z1-6]*)([^\n>]?)(>)(.*?)(<\/\2>)/mg, function(wholeMatch,m1,m2,m3,m4,m5,m6,offset) {
-      newBlockText += applyPants(blockText.substring(blockOffset, offset)) + educatePants(wholeMatch,m1,m2,m3,m4,m5,m6);
-      blockOffset = offset + wholeMatch.length;
+  var educatePants = function(text) {
+    // Here we parse HTML in a very bad manner
+    return text.replace(/([\s\S]*?)(?:<([a-zA-Z1-6]+)([^\n]*?>)([\s\S]*?)(<\/\2>)|$)/g, function(wholeMatch, m1, m2, m3, m4, m5, offset) {
+      var result = applyPants(m1);
+      if(m2 !== undefined) {
+        // Skip special tags
+        if(!/code|kbd|pre|script|noscript|iframe|math|ins|del|pre/i.test(m2)) {
+          m4 = educatePants(m4);
+        }
+        result += '<' + m2 + m3 + m4 + m5;
+      }
+      return result;
     });
-    newBlockText += applyPants(blockText.substring(blockOffset));
-    return m1 + m2 + m3 + m4 + newBlockText + m6;
   };
     
   function revertPants(wholeMatch, m1) {
@@ -654,7 +653,7 @@
 
   // Find and convert markdown extra definition lists into html.
   Markdown.Extra.prototype.runSmartyPants = function(text) {
-    text = text.replace(/(<)([a-zA-Z1-6]+)([^\n>]*?)(>)([\s\S]*?)(<\/\2>)/gm, educatePants);
+    text = educatePants(text);
     //clean everything inside html tags
     text = text.replace(/(<([a-zA-Z1-6]+)\b([^\n>]*?)(\/)?>)/g, revertPants);
     return text;

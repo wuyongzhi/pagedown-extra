@@ -650,11 +650,11 @@
 
   // Find and convert markdown extra definition lists into html.
   Markdown.Extra.prototype.runSmartyPants = function(text) {
-    text = text.replace(/(<)([a-zA-Z1-6]+)([^\n>]*?)(>)(.*?)(<\/\2>)/gm, educatePants);
+    text = text.replace(/(<)([a-zA-Z1-6]+)([^\n>]*?)(>)([\s\S]*?)(<\/\2>)/gm, educatePants);
     //clean everything inside html tags
     text = text.replace(/(<([a-zA-Z1-6]+)\b([^\n>]*?)(\/)?>)/g, revertPants);
     //clean out replacements inside special tags
-    text = text.replace(/((<)(code|kbd|pre|script|noscript|iframe|math|ins|del|pre)(.?)(>)(.*?)(<\/)(code|kbd|pre|script|noscript|iframe|math|ins|del|pre)(>))/gm, revertPants);
+    text = text.replace(/((<)(code|kbd|pre|script|noscript|iframe|math|ins|del|pre)(.?)(>)([\s\S]*?)(<\/)(code|kbd|pre|script|noscript|iframe|math|ins|del|pre)(>))/gm, revertPants);
     return text;
   };
   

@@ -598,6 +598,10 @@
   ******************************************************************/
   
   var educatePants = function(wholeMatch,m1,m2,m3,m4,m5,m6) {
+    // Skip special tags
+    if(/code|kbd|pre|script|noscript|iframe|math|ins|del|pre/i.test(m2)) {
+      return wholeMatch;
+    }
     var blockText = m5;
     var blockOffset = 0;
     var newBlockText = '';
@@ -653,8 +657,6 @@
     text = text.replace(/(<)([a-zA-Z1-6]+)([^\n>]*?)(>)([\s\S]*?)(<\/\2>)/gm, educatePants);
     //clean everything inside html tags
     text = text.replace(/(<([a-zA-Z1-6]+)\b([^\n>]*?)(\/)?>)/g, revertPants);
-    //clean out replacements inside special tags
-    text = text.replace(/((<)(code|kbd|pre|script|noscript|iframe|math|ins|del|pre)(.?)(>)([\s\S]*?)(<\/)(code|kbd|pre|script|noscript|iframe|math|ins|del|pre)(>))/gm, revertPants);
     return text;
   };
   

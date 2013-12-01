@@ -85,7 +85,11 @@ describe("Markdown.Extra", function() {
   var smartypantsBackticks = "``Isn't this fun?''";
   var smartypantsBackticksHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
   var smartypantsSingleBackticks = "`Isn't this fun?'";
-  var smartypantsSingleBackticksHtml = "<p>&#8216;Isn&#8217;t this fun?&#8217;</p>";
+  var smartypantsSingleBackticksHtml = "<p>`Isn&#8217;t this fun?&#8217;</p>";
+  var smartypants80s = "the '80s";
+  var smartypants80sHtml = "<p>the &#8217;80s</p>";
+  var smartypantsSingleQuoteAfterTag = "\"*Custer*'s Last Stand.\"";
+  var smartypantsSingleQuoteAfterTagHtml = "<p>&#8220;<em>Custer</em>&#8217;s Last Stand.&#8221;</p>";
   var smartypantsDash = "This -- is an en-dash and this --- is an em-dash";
   var smartypantsDashHtml = "<p>This &#8211; is an en-dash and this &#8212; is an em-dash</p>";
   var smartypantsInCode = "`\"Isn't this fun?\"` and `This -- is an en-dash and this --- is an em-dash`";
@@ -431,6 +435,16 @@ describe("Markdown.Extra", function() {
       it("should convert single backticks properly", function() {
         var html = strip(sconv.makeHtml(smartypantsSingleBackticks));
         expect(html).toEqual(smartypantsSingleBackticksHtml);
+      });
+
+      it("should convert \"'80s\" properly", function() {
+        var html = strip(sconv.makeHtml(smartypants80s));
+        expect(html).toEqual(smartypants80sHtml);
+      });
+
+      it("should convert \"'s\" after a closing tag properly", function() {
+        var html = strip(sconv.makeHtml(smartypantsSingleQuoteAfterTag));
+        expect(html).toEqual(smartypantsSingleQuoteAfterTagHtml);
       });
 
       it("should convert single dash properly", function() {

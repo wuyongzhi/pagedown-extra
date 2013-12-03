@@ -102,13 +102,13 @@
     return result;
   }
 
-  // Convert escaped special characters to HTML decimal entity codes.
-  function processEscapes(text) {
+  // Convert escaped special characters
+  function processEscapesStep1(text) {
     // Markdown extra adds two escapable characters, `:` and `|`
-    // If escaped, we convert them to html entities so our
-    // regexes don't recognize them. Markdown doesn't support escaping
-    // the escape character, e.g. `\\`, which make this even simpler.
-    return text.replace(/\\\|/g, '&#124;').replace(/\\:/g, '&#58;');
+    return text.replace(/\\\|/g, '~I').replace(/\\:/g, '~i');
+  }
+  function processEscapesStep2(text) {
+    return text.replace(/~I/g, '|').replace(/~i/g, ':');
   }
 
   // Duplicated from PageDown converter
@@ -207,8 +207,10 @@
     converter.hooks.chain("preBlockGamut", function(text, blockGamutHookCallback) {
       // Keep a reference to the block gamut callback to run recursively
       extra.blockGamutHookCallback = blockGamutHookCallback;
-      text = processEscapes(text);
-      return extra.doTransform(preBlockGamutTransformations, text) + '\n';
+      text = processEscapesStep1(text);
+      text = extra.doTransform(preBlockGamutTransformations, text) + '\n';
+      text = processEscapesStep2(text);
+      return text;
     });
 
     // Keep a reference to the hook chain running before doPostConversion to apply on hashed extra blocks

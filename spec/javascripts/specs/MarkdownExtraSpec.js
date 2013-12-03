@@ -84,8 +84,8 @@ describe("Markdown.Extra", function() {
   var smartypantsQuotesHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
   var smartypantsBackticks = "``Isn't this fun?''";
   var smartypantsBackticksHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
-  var smartypantsSingleBackticks = "`Isn't this fun?'";
-  var smartypantsSingleBackticksHtml = "<p>`Isn&#8217;t this fun?&#8217;</p>";
+  var smartypantsSingleBackticks = "'Isn't this fun?'";
+  var smartypantsSingleBackticksHtml = "<p>&#8216;Isn&#8217;t this fun?&#8217;</p>";
   var smartypants80s = "the '80s";
   var smartypants80sHtml = "<p>the &#8217;80s</p>";
   var smartypantsSingleQuoteAfterTag = "\"*Custer*'s Last Stand.\"";
@@ -98,6 +98,9 @@ describe("Markdown.Extra", function() {
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
     "\n\nCool. And a link: [google](http://www.google.com)";
+  // Markdown extra escaped characters
+  var escapedCharacters = "\\|\\: `\\|\\:`";
+  var escapedCharactersHtml = "<p>|: <code>|:</code></p>";
 
   function strip(str) {
     return str.replace(/^\s+|\s+$/g, '');
@@ -215,6 +218,13 @@ describe("Markdown.Extra", function() {
   describe("when using the sanitizing converter", function() {
     var sconv;
 
+    it("should process escaped | and :", function() {
+      sconv = Markdown.getSanitizingConverter();
+      Markdown.Extra.init(sconv);
+      var html = strip(sconv.makeHtml(escapedCharacters));
+      expect(html).toEqual(escapedCharactersHtml);
+    });
+    
     describe("with fenced code blocks", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();

@@ -86,6 +86,8 @@ describe("Markdown.Extra", function() {
   var smartypantsBackticksHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
   var smartypantsSingleBackticks = "'Isn't this fun?'";
   var smartypantsSingleBackticksHtml = "<p>&#8216;Isn&#8217;t this fun?&#8217;</p>";
+  var smartypantsDoubleSetsQuotes = "He said, \"'Quoted' words in a larger quote.\"";
+  var smartypantsDoubleSetsQuotesHtml = "<p>He said, &#8220;&#8216;Quoted&#8217; words in a larger quote.&#8221;</p>";
   var smartypants80s = "the '80s";
   var smartypants80sHtml = "<p>the &#8217;80s</p>";
   var smartypantsSingleQuoteAfterTag = "\"*Custer*'s Last Stand.\"";
@@ -94,6 +96,8 @@ describe("Markdown.Extra", function() {
   var smartypantsDashHtml = "<p>This &#8211; is an en-dash and this &#8212; is an em-dash</p>";
   var smartypantsInCode = "`\"Isn't this fun?\"` and `This -- is an en-dash and this --- is an em-dash`";
   var smartypantsInCodeHtml = "<p><code>\"Isn't this fun?\"</code> and <code>This -- is an en-dash and this --- is an em-dash</code></p>";
+  var smartypantsInComment = "\"Isn't this fun?\" <!-- \"Yeah, so cool...\" -->";
+  var smartypantsInCommentHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221; <!-- \"Yeah, so cool...\" --></p>";
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
@@ -447,6 +451,11 @@ describe("Markdown.Extra", function() {
         expect(html).toEqual(smartypantsSingleBackticksHtml);
       });
 
+      it("should convert double sets of quotes properly", function() {
+        var html = strip(sconv.makeHtml(smartypantsDoubleSetsQuotes));
+        expect(html).toEqual(smartypantsDoubleSetsQuotesHtml);
+      });
+
       it("should convert \"'80s\" properly", function() {
         var html = strip(sconv.makeHtml(smartypants80s));
         expect(html).toEqual(smartypants80sHtml);
@@ -533,6 +542,21 @@ describe("Markdown.Extra", function() {
       it("should work correctly with multiple items", function() {
         var html = sconv.makeHtml(attrList);
         expect(html).toEqual(attrListHtml);
+      });
+    });
+  });
+
+  describe("when using the default converter", function() {
+    var sconv;
+    describe("with SmartyPants", function() {
+      beforeEach(function() {
+        sconv = new Markdown.Converter();
+        Markdown.Extra.init(sconv, {extensions: "smartypants"});
+      });
+
+      it("should not perform SmartyPants in comments", function() {
+        var html = strip(sconv.makeHtml(smartypantsInComment));
+        expect(html).toEqual(smartypantsInCommentHtml);
       });
     });
   });

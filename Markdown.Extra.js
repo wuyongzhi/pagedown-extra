@@ -604,11 +604,16 @@
     var result = '';
     var blockOffset = 0;
     // Here we parse HTML in a very bad manner
-    text.replace(/(<)([a-zA-Z1-6]+)([^\n]*?>)([\s\S]*?)(<\/\2>)/g, function(wholeMatch, m1, m2, m3, m4, m5, offset) {
+    text.replace(/(?:<!--[\s\S]*?-->)|(<)([a-zA-Z1-6]+)([^\n]*?>)([\s\S]*?)(<\/\2>)/g, function(wholeMatch, m1, m2, m3, m4, m5, offset) {
       var token = text.substring(blockOffset, offset);
       result += self.applyPants(token);
       self.smartyPantsLastChar = result.substring(result.length - 1);
       blockOffset = offset + wholeMatch.length;
+      if(!m1) {
+        // Skip commentary
+        result += wholeMatch;
+        return;
+      }
       // Skip special tags
       if(!/code|kbd|pre|script|noscript|iframe|math|ins|del|pre/i.test(m2)) {
         m4 = self.educatePants(m4);
@@ -698,7 +703,7 @@
   Markdown.Extra.prototype.runSmartyPants = function(text) {
     this.smartyPantsLastChar = '';
     text = this.educatePants(text);
-    //clean everything inside html tags
+    // Clean everything inside html tags (some of them may have been converted due to our rough html parsing)
     text = text.replace(/(<([a-zA-Z1-6]+)\b([^\n>]*?)(\/)?>)/g, revertPants);
     return text;
   };

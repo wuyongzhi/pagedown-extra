@@ -290,15 +290,18 @@
    * Attribute Blocks                                               *
    *****************************************************************/
 
+  // TODO: use sentinels. Should we just add/remove them in doConversion?
+  // TODO: better matches for id / class attributes
+  var attrBlock = "\\{[ \\t]*((?:[#.][-_:a-zA-Z0-9]+[ \\t]*)+)\\}";
+  var hdrAttributesA = new RegExp("^(#{1,6}.*#{0,6})[ \\t]+" + attrBlock + "[ \\t]*(?:\\n|0x03)", "gm");
+  var hdrAttributesB = new RegExp("^(.*)[ \\t]+" + attrBlock + "[ \\t]*\\n" +
+    "(?=[\\-|=]+\\s*(?:\\n|0x03))", "gm"); // underline lookahead
+  var fcbAttributes =  new RegExp("^(```[^{\\n]*)[ \\t]+" + attrBlock + "[ \\t]*\\n" +
+    "(?=([\\s\\S]*?)\\n```\\s*(\\n|0x03))", "gm");
+      
   // Extract headers attribute blocks, move them above the element they will be
   // applied to, and hash them for later.
   Markdown.Extra.prototype.hashHeaderAttributeBlocks = function(text) {
-    // TODO: use sentinels. Should we just add/remove them in doConversion?
-    // TODO: better matches for id / class attributes
-    var attrBlock = "\\{\\s*[.|#][^}]+\\}";
-    var hdrAttributesA = new RegExp("^(#{1,6}.*#{0,6})\\s+(" + attrBlock + ")[ \\t]*(\\n|0x03)", "gm");
-    var hdrAttributesB = new RegExp("^(.*)\\s+(" + attrBlock + ")[ \\t]*\\n" +
-      "(?=[\\-|=]+\\s*(\\n|0x03))", "gm"); // underline lookahead
     
     var self = this;
     function attributeCallback(wholeMatch, pre, attr) {
@@ -315,9 +318,6 @@
   Markdown.Extra.prototype.hashFcbAttributeBlocks = function(text) {
     // TODO: use sentinels. Should we just add/remove them in doConversion?
     // TODO: better matches for id / class attributes
-    var attrBlock = "\\{\\s*[.|#][^}]+\\}";
-    var fcbAttributes =  new RegExp("^(```[^{\\n]*)\\s+(" + attrBlock + ")[ \\t]*\\n" +
-                                    "(?=([\\s\\S]*?)\\n```\\s*(\\n|0x03))", "gm");
 
     var self = this;
     function attributeCallback(wholeMatch, pre, attr) {
@@ -340,11 +340,11 @@
       var attributes = self.hashBlocks[key];
 
       // get id
-      var id = attributes.match(/#[^\s{}]+/g) || [];
+      var id = attributes.match(/#[^\s#.]+/g) || [];
       var idStr = id[0] ? ' id="' + id[0].substr(1, id[0].length - 1) + '"' : '';
 
       // get classes and merge with existing classes
-      var classes = attributes.match(/\.[^\s{}]+/g) || [];
+      var classes = attributes.match(/\.[^\s#.]+/g) || [];
       for (var i = 0; i < classes.length; i++) // Remove leading dot
         classes[i] = classes[i].substr(1, classes[i].length - 1);
 

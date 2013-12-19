@@ -168,12 +168,13 @@
     var extra = new Markdown.Extra();
     var postNormalizationTransformations = [];
     var preBlockGamutTransformations = [];
+    var postSpanGamutTransformations = [];
     var postConversionTransformations = ["unHashExtraBlocks"];
 
     options = options || {};
     options.extensions = options.extensions || ["all"];
     if (contains(options.extensions, "all")) {
-      options.extensions = ["tables", "fenced_code_gfm", "def_list", "attr_list", "footnotes", "smartypants"];
+      options.extensions = ["tables", "fenced_code_gfm", "def_list", "attr_list", "footnotes", "smartypants", "strikethrough", "newlines"];
     }
     preBlockGamutTransformations.push("wrapHeaders");
     if (contains(options.extensions, "attr_list")) {
@@ -199,6 +200,12 @@
     if (contains(options.extensions, "smartypants")) {
       postConversionTransformations.push("runSmartyPants");
     }
+    if (contains(options.extensions, "strikethrough")) {
+      postSpanGamutTransformations.push("strikethrough");
+    }
+    if (contains(options.extensions, "newlines")) {
+      postSpanGamutTransformations.push("newlines");
+    }
     
     converter.hooks.chain("postNormalization", function(text) {
       return extra.doTransform(postNormalizationTransformations, text) + '\n';
@@ -211,6 +218,10 @@
       text = extra.doTransform(preBlockGamutTransformations, text) + '\n';
       text = processEscapesStep2(text);
       return text;
+    });
+
+    converter.hooks.chain("postSpanGamut", function(text) {
+      return extra.doTransform(postSpanGamutTransformations, text);
     });
 
     // Keep a reference to the hook chain running before doPostConversion to apply on hashed extra blocks
@@ -833,5 +844,28 @@
     return removeAnchors(listStr);
   };
 
+
+  /***********************************************************
+  * Strikethrough                                            *
+  ************************************************************/
+
+  Markdown.Extra.prototype.strikethrough = function(text) {
+    // Pretty much duplicated from _DoItalicsAndBold
+    return text.replace(/([\W_]|^)~T~T(?=\S)([^\r]*?\S[\*_]*)~T~T([\W_]|$)/g,
+      "$1<del>$2</del>$3");
+  };
+
+
+  /***********************************************************
+  * New lines                                                *
+  ************************************************************/
+
+  Markdown.Extra.prototype.newlines = function(text) {
+    // We have to ignore already converted newlines
+    return text.replace(/(<br>)?\n/g, function(wholeMatch, br) {
+      return br ? wholeMatch : " <br>\n";
+    });
+  };
+  
 })();
 

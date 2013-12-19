@@ -98,6 +98,11 @@ describe("Markdown.Extra", function() {
   var smartypantsInCodeHtml = "<p><code>\"Isn't this fun?\"</code> and <code>This -- is an en-dash and this --- is an em-dash</code></p>";
   var smartypantsInComment = "\"Isn't this fun?\" <!-- \"Yeah, so cool...\" -->";
   var smartypantsInCommentHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221; <!-- \"Yeah, so cool...\" --></p>";
+  
+  var strikethrough = '~~Mistaken text.~~';
+  var strikethroughHtml = '<p><del>Mistaken text.</del></p>';
+  var newlines = 'Roses are red\nViolets are blue';
+  var newlinesHtml = '<p>Roses are red <br>\nViolets are blue</p>';
 
   // some basic markdown without extensions
   var markdown = "#TestHeader\n_This_ is *markdown*" +
@@ -476,6 +481,32 @@ describe("Markdown.Extra", function() {
         expect(html).toEqual(smartypantsInCodeHtml);
       });
 
+    });
+    
+    describe("with strikethrough", function() {
+      beforeEach(function() {
+        sconv = Markdown.getSanitizingConverter();
+        Markdown.Extra.init(sconv, {extensions: "strikethrough"});
+      });
+      
+      it("should convert strikethrough properly", function() {
+        var html = strip(sconv.makeHtml(strikethrough));
+        expect(html).toEqual(strikethroughHtml);
+      });
+      
+    });
+    
+    describe("with newlines", function() {
+      beforeEach(function() {
+        sconv = Markdown.getSanitizingConverter();
+        Markdown.Extra.init(sconv, {extensions: "newlines"});
+      });
+      
+      it("should convert new lines properly", function() {
+        var html = strip(sconv.makeHtml(newlines));
+        expect(html).toEqual(newlinesHtml);
+      });
+      
     });
     
     describe("with attribute lists", function() {

@@ -202,6 +202,38 @@ SmartyPants extension converts ASCII punctuation characters into "smart" typogra
 | Dashes           | `This -- is an en-dash and this --- is an em-dash` | This &#8211; is an en-dash and this &#8212; is an em-dash |
 
 
+### [Newlines][10]
+
+Newlines &agrave; la GitHub (without the need of two white spaces):
+
+```md
+Roses are red
+Violets are blue
+```
+
+becomes:
+
+```html
+<p>Roses are red <br>
+Violets are blue</p>
+```
+
+
+### [Strikethrough][11]
+
+Strikethrough &agrave; la GitHub:
+
+```md
+~~Mistaken text.~~
+```
+
+becomes:
+
+```html
+<p><del>Mistaken text.</del></p>
+```
+
+
 
 ## Extension / Option Reference
 You can enable all of the currently supported extensions with `{extensions: "all"}`. This is also
@@ -217,6 +249,8 @@ same naming scheme as the excellent Python Markdown library.
 | attr_list       | Special attributes list for headers and fenced code blocks |
 | footnotes       | Footnotes |
 | smartypants     | SmartyPants |
+| newlines        | GFM newlines |
+| strikethrough   | GFM strikethrough |
 | *smart_strong*  | No strong emphasis in the middle of words |
 | *abbr*          | Abbreviations |
 | *fenced_code*   | PHP Markdown Extra fenced code blocks |
@@ -228,7 +262,7 @@ same naming scheme as the excellent Python Markdown library.
 
 *Italicized extensions are planned, and will be added in roughly the order shown*
 
-See PHP Markdown Extra's [documentation][10] for a more complete overview
+See PHP Markdown Extra's [documentation][12] for a more complete overview
 of syntax. In situations where it differs from how things are done on GitHub --
 alignment of table headers, for instance -- I've chosen compatibility with gfm, which
 seems to be quickly becoming the most widely used markdown implementation.
@@ -255,4 +289,6 @@ See LICENSE.txt
   [7]: https://github.com/fletcher/MultiMarkdown/blob/master/Documentation/MultiMarkdown%20User%27s%20Guide.md#footnotes
   [8]: http://michelf.ca/projects/php-markdown/extra/#spe-attr
   [9]: http://daringfireball.net/projects/smartypants/
-  [10]: http://michelf.ca/projects/php-markdown/extra/#table "Markdown Extra Table Documentation"
+  [10]: https://help.github.com/articles/github-flavored-markdown#newlines
+  [11]: https://help.github.com/articles/github-flavored-markdown#strikethrough
+  [12]: http://michelf.ca/projects/php-markdown/extra/#table "Markdown Extra Table Documentation"

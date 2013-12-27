@@ -861,9 +861,9 @@
   ************************************************************/
 
   Markdown.Extra.prototype.newlines = function(text) {
-    // We have to ignore already converted newlines
-    return text.replace(/(<br>)?\n/g, function(wholeMatch, br) {
-      return br ? wholeMatch : " <br>\n";
+    // We have to ignore already converted newlines and line breaks in sub-list items
+    return text.replace(/(<(?:br|\/li)>)?\n/g, function(wholeMatch, previousTag) {
+      return previousTag ? wholeMatch : " <br>\n";
     });
   };
   

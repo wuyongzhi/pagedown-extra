@@ -3,6 +3,12 @@ describe("Markdown.Extra", function() {
   var codeBlock = "```foolang\nfoo=$bar;\n```";
   // expected code block html
   var codeBlockHtml ='<pre><code class="foolang">foo=$bar;</code></pre>';
+  // html in code block
+  var codeBlockWithHtml = "```\n<div></div>\n```";
+  var codeBlockWithHtmlHtml = "<pre><code>&lt;div&gt;&lt;/div&gt;</code></pre>";
+  // code block inside list item
+  var codeBlockInLi = "- list item\n\n    ```\n    foo=$bar;\n    ```";
+  var codeBlockInLiHtml = "<ul>\n<li><p>list item</p>\n\n<pre><code>foo=$bar;</code></pre></li>\n</ul>";
 
   // basic table
   var table = "h1 | h2 | h3\n:- | :-: | -:\n1 | 2 | 3";
@@ -243,6 +249,16 @@ describe("Markdown.Extra", function() {
       it("should convert code blocks correctly", function() {
         var html = strip(sconv.makeHtml(codeBlock));
         expect(html).toEqual(codeBlockHtml);
+      });
+
+      it("should convert code blocks with html correctly", function() {
+        var html = strip(sconv.makeHtml(codeBlockWithHtml));
+        expect(html).toEqual(codeBlockWithHtmlHtml);
+      });
+
+      it("should convert code blocks inside list items correctly", function() {
+        var html = strip(sconv.makeHtml(codeBlockInLi));
+        expect(html).toEqual(codeBlockInLiHtml);
       });
 
       it("should recognize code blocks at beginning of input", function() {

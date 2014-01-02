@@ -184,6 +184,9 @@
       extra.attributeBlocks = true;
     }
     if (contains(options.extensions, "fenced_code_gfm")) {
+      // This step will convert fcb inside list items and blockquotes
+      preBlockGamutTransformations.push("fencedCodeBlocks");
+      // This extra step is to prevent html blocks hashing and link definition/footnotes stripping inside fcb
       postNormalizationTransformations.push("fencedCodeBlocks");
     }
     if (contains(options.extensions, "tables")) {

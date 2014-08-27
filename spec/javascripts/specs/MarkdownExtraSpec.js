@@ -18,15 +18,15 @@ describe("Markdown.Extra", function() {
   var tableHtml ='<table>\n' +
     '<thead>\n' +
     '<tr>\n' +
-    '  <th style="text-align:left;">h1</th>\n' +
-    '  <th style="text-align:center;">h2</th>\n' +
-    '  <th style="text-align:right;">h3</th>\n' +
+    '  <th align="left">h1</th>\n' +
+    '  <th align="center">h2</th>\n' +
+    '  <th align="right">h3</th>\n' +
     '</tr>\n' +
     '</thead>\n' +
     '<tr>\n' +
-    '  <td style="text-align:left;">1</td>\n' +
-    '  <td style="text-align:center;">2</td>\n' +
-    '  <td style="text-align:right;">3</td>\n' +
+    '  <td align="left">1</td>\n' +
+    '  <td align="center">2</td>\n' +
+    '  <td align="right">3</td>\n' +
     '</tr>\n' +
     '</table>';
   // table containing inline and block-level tags and markdown
@@ -85,7 +85,7 @@ describe("Markdown.Extra", function() {
     + "   [^footnote1]: footnote1.\n\nParagraph\n\n"
     + "[^footnote2]: footnote2.";
   var undefinedFootnote = "[^abc]";
-  
+
   var smartypantsQuotes = "\"Isn't this fun?\"";
   var smartypantsQuotesHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221;</p>";
   var smartypantsBackticks = "``Isn't this fun?''";
@@ -104,7 +104,7 @@ describe("Markdown.Extra", function() {
   var smartypantsInCodeHtml = "<p><code>\"Isn't this fun?\"</code> and <code>This -- is an en-dash and this --- is an em-dash</code></p>";
   var smartypantsInComment = "\"Isn't this fun?\" <!-- \"Yeah, so cool...\" -->";
   var smartypantsInCommentHtml = "<p>&#8220;Isn&#8217;t this fun?&#8221; <!-- \"Yeah, so cool...\" --></p>";
-  
+
   var strikethrough = '~~Mistaken text.~~';
   var strikethroughHtml = '<p><del>Mistaken text.</del></p>';
   var newlines = 'Roses are red\nViolets are blue';
@@ -239,7 +239,7 @@ describe("Markdown.Extra", function() {
       var html = strip(sconv.makeHtml(escapedCharacters));
       expect(html).toEqual(escapedCharactersHtml);
     });
-    
+
     describe("with fenced code blocks", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();
@@ -316,7 +316,8 @@ describe("Markdown.Extra", function() {
 
       it('should have correct alignment of table data', function() {
         var html = sconv.makeHtml(table);
-        var matches = html.match(/<td style="text-align:(left|right|center);">/g);
+        var matches = html.match(/<td align="(left|right|center)">/g);
+        expect(matches).not.toBeNull();
         expect(matches[0]).toMatch("left");
         expect(matches[1]).toMatch("center");
         expect(matches[2]).toMatch("right");
@@ -364,7 +365,7 @@ describe("Markdown.Extra", function() {
         var html = sconv.makeHtml(text);
         expect(html).toMatch(/<table>[\s\S]*~[\s\S]*\$[\s\S]*<\/table>/);
       });
-      
+
       it("should convert reference links", function() {
         var html = sconv.makeHtml(tableWithRefLinks);
         expect(html).toMatch(/<table>[\s\S]*<a href=[\s\S]*<a href=[\s\S]*<\/table>/);
@@ -410,12 +411,12 @@ describe("Markdown.Extra", function() {
         var matches = html.match(/<dl>/g);
         expect(matches.length).toEqual(1);
       });
-      
+
       it("should convert nested definitions", function() {
         var html = sconv.makeHtml(defListNested);
         expect(html).toMatch(/<dd>\s*<dl>\s*<dt>/);
       });
-      
+
       it("should convert title before definitions", function() {
         var html = sconv.makeHtml(defListTitle);
         expect(html).toMatch(/<h1>[\s\S]*<dl>/);
@@ -428,35 +429,35 @@ describe("Markdown.Extra", function() {
         sconv = Markdown.getSanitizingConverter();
         Markdown.Extra.init(sconv, {extensions: "footnotes"});
       });
-      
+
       it("should convert one footnote properly", function() {
         var html = strip(sconv.makeHtml(footnotes));
         expect(html).toEqual(footnotesHtml);
       });
-      
+
       it("should not convert nested footnote", function() {
         var html = strip(sconv.makeHtml(footnotesNested));
         expect(html).toEqual(footnotesNestedHtml);
       });
-      
+
       it("should convert multiple footnotes properly", function() {
         var html = strip(sconv.makeHtml(footnotesComplex));
         expect(html).toMatch(/<p>.+<a[\s\S]+<p>.+<a[\s\S]+<p>[\s\S]+<div[\s\S]+<hr>\s+<ol>\s+<li.+<a[\s\S]+<li.+<a/);
       });
-      
+
       it("should not convert undefined footnote", function() {
         var html = strip(sconv.makeHtml(undefinedFootnote));
         expect(html).toMatch(/[^abc]/);
       });
-      
+
     });
-    
+
     describe("with SmartyPants", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();
         Markdown.Extra.init(sconv, {extensions: "smartypants"});
       });
-      
+
       it("should convert quotes properly", function() {
         var html = strip(sconv.makeHtml(smartypantsQuotes));
         expect(html).toEqual(smartypantsQuotesHtml);
@@ -498,33 +499,33 @@ describe("Markdown.Extra", function() {
       });
 
     });
-    
+
     describe("with strikethrough", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();
         Markdown.Extra.init(sconv, {extensions: "strikethrough"});
       });
-      
+
       it("should convert strikethrough properly", function() {
         var html = strip(sconv.makeHtml(strikethrough));
         expect(html).toEqual(strikethroughHtml);
       });
-      
+
     });
-    
+
     describe("with newlines", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();
         Markdown.Extra.init(sconv, {extensions: "newlines"});
       });
-      
+
       it("should convert new lines properly", function() {
         var html = strip(sconv.makeHtml(newlines));
         expect(html).toEqual(newlinesHtml);
       });
-      
+
     });
-    
+
     describe("with attribute lists", function() {
       beforeEach(function() {
         sconv = Markdown.getSanitizingConverter();
@@ -566,7 +567,7 @@ describe("Markdown.Extra", function() {
         expect(html).toMatch(/<h2 id="header-id2" class="class1">/);
         expect(html).toMatch(/<h2 id="header-id3" class="class1">/);
       });
-      
+
       it("should correctly apply attributes to fenced code blocks mixed with headers", function() {
         var hdrBlock1 = "Hello There\n=========";
         var hdrBlock2 = "## Hello There";
@@ -577,7 +578,7 @@ describe("Markdown.Extra", function() {
         expect(html).toMatch(/<pre id="test-id" class="test-class">/);
         expect(html).toMatch(/<pre id="awesome" class="prettyprint foo">/);
       });
-      
+
       it("should merge classes with preexisting classes", function() {
         var text = "```foolang  {.test-class .prettyprint} \n\n foo=bar; \n\n```";
         var converter = Markdown.getSanitizingConverter();

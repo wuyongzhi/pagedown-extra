@@ -437,11 +437,11 @@
       for (var i = 0; i < alignspecs.length; i++) {
         var spec = alignspecs[i];
         if (spec.match(/^ *-+: *$/m))
-          align[i] = ' style="text-align:right;"';
+          align[i] = ' align="right"';
         else if (spec.match(/^ *:-+: *$/m))
-          align[i] = ' style="text-align:center;"';
+          align[i] = ' align="center"';
         else if (spec.match(/^ *:-+ *$/m))
-          align[i] = ' style="text-align:left;"';
+          align[i] = ' align="left"';
         else align[i] = '';
       }
 

@@ -310,7 +310,7 @@
   var hdrAttributesA = new RegExp("^(#{1,6}.*#{0,6})[ \\t]+" + attrBlock + "[ \\t]*(?:\\n|0x03)", "gm");
   var hdrAttributesB = new RegExp("^(.*)[ \\t]+" + attrBlock + "[ \\t]*\\n" +
     "(?=[\\-|=]+\\s*(?:\\n|0x03))", "gm"); // underline lookahead
-  var fcbAttributes =  new RegExp("^(```[ \\t]*[^{\\s]*)[ \\t]+" + attrBlock + "[ \\t]*\\n" +
+  var fcbAttributes =  new RegExp("^(```[^`\\n]*)[ \\t]+" + attrBlock + "[ \\t]*\\n" +
     "(?=([\\s\\S]*?)\\n```[ \\t]*(\\n|0x03))", "gm");
       
   // Extract headers attribute blocks, move them above the element they will be
@@ -583,8 +583,8 @@
     }
 
     var self = this;
-    text = text.replace(/(?:^|\n)```[ \t]*(\S*)[ \t]*\n([\s\S]*?)\n```[ \t]*(?=\n)/g, function(match, m1, m2) {
-      var language = m1, codeblock = m2;
+    text = text.replace(/(?:^|\n)```([^`\n]*)\n([\s\S]*?)\n```[ \t]*(?=\n)/g, function(match, m1, m2) {
+      var language = trim(m1), codeblock = m2;
 
       // adhere to specified options
       var preclass = self.googleCodePrettify ? ' class="prettyprint"' : '';

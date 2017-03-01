@@ -453,6 +453,10 @@ else
             // Process anchor and image tags. Images must come first,
             // because ![foo][f] looks like an anchor.
             text = _DoImages(text);
+
+            // Process video tags
+            text = _DoVideos(text);
+
             text = _DoAnchors(text);
 
             // Make links out of things like `<http://example.com/>`
@@ -692,6 +696,7 @@ else
 
             return text;
         }
+
         
         function attributeEncode(text) {
             // unconditionally replace angle brackets here -- what ends up in an attribute (e.g. alt or title)
@@ -743,6 +748,114 @@ else
 
             return result;
         }
+
+
+
+
+        function _DoVideos(text) {
+            //
+            // Turn Markdown video shortcuts into <video> tags.
+            //
+            //
+            // //
+            // // First, handle reference-style labeled videos: ![alt text][id]
+            // //
+            //
+            // /*
+            //  text = text.replace(/
+            //  (                   // wrap whole match in $1
+            //  !\[
+            //  (.*?)           // alt text = $2
+            //  \]
+            //
+            //  [ ]?            // one optional space
+            //  (?:\n[ ]*)?     // one optional newline followed by spaces
+            //
+            //  \[
+            //  (.*?)           // id = $3
+            //  \]
+            //  )
+            //  ()()()()            // pad rest of backreferences
+            //  /g, writeImageTag);
+            //  */
+            // text = text.replace(/(@\[(.*?)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeVideoTag);
+
+            //
+            // Next, handle inline videos:  @[alt text](url "optional title")
+            // Don't forget: encode * and _
+
+            /*
+             text = text.replace(/
+             (                   // wrap whole match in $1
+             !\[
+             (.*?)           // alt text = $2
+             \]
+             \s?             // One optional whitespace character
+             \(              // literal paren
+             [ \t]*
+             ()              // no id, so leave $3 empty
+             <?(\S+?)>?      // src url = $4
+             [ \t]*
+             (               // $5
+             (['"])      // quote char = $6
+             (.*?)       // title = $7
+             \6          // matching quote
+             [ \t]*
+             )?              // title is optional
+             \)
+             )
+             /g, writeVideoTag);
+             */
+            text = text.replace(/(@\[(.*?)\]\s?\([ \t]*()<?(\S+?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeVideoTag);
+
+            return text;
+        }
+
+        function writeVideoTag(wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
+            var whole_match = m1;
+            var alt_text = m2;
+            var link_id = m3.toLowerCase();
+            var url = m4;
+            var title = m7;
+
+            if (!title) title = "";
+
+            if (url == "") {
+                if (link_id == "") {
+                    // lower-case and turn embedded newlines into spaces
+                    link_id = alt_text.toLowerCase().replace(/ ?\n/g, " ");
+                }
+                url = "#" + link_id;
+
+                if (g_urls.get(link_id) != undefined) {
+                    url = g_urls.get(link_id);
+                    if (g_titles.get(link_id) != undefined) {
+                        title = g_titles.get(link_id);
+                    }
+                }
+                else {
+                    return whole_match;
+                }
+            }
+
+            alt_text = escapeCharacters(attributeEncode(alt_text), "*_[]()");
+            url = escapeCharacters(url, "*_");
+            var result = "<video src=\"" + url + "\" alt=\"" + alt_text + "\"";
+
+            // attacklab: Markdown.pl adds empty title attributes to images.
+            // Replicate this bug.
+
+            //if (title != "") {
+            title = attributeEncode(title);
+            title = escapeCharacters(title, "*_");
+            result += " title=\"" + title + "\"";
+            //}
+
+            result += " />";
+
+            return result;
+        }
+
 
         function _DoHeaders(text) {
 

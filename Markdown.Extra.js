@@ -5,7 +5,7 @@
   // all span-level tags through, with or without attributes.
   var inlineTags = new RegExp(['^(<\\/?(a|abbr|acronym|applet|area|b|basefont|',
                                'bdo|big|button|cite|code|del|dfn|em|figcaption|',
-                               'font|i|iframe|img|input|ins|kbd|label|map|',
+                               'font|i|iframe|img|video|input|ins|kbd|label|map|',
                                'mark|meter|object|param|progress|q|ruby|rp|rt|s|',
                                'samp|script|select|small|span|strike|strong|',
                                'sub|sup|textarea|time|tt|u|var|wbr)[^>]*>|',

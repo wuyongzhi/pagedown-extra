@@ -1026,6 +1026,11 @@ else
             list_str = list_str.replace(/
                 (^[ \t]*)                       // leading whitespace = $1
                 ({MARKER}) [ \t]+               // list marker = $2
+                (                               // whole checkbox|radio = $3
+                    [\[\(]
+                    ((x|X|)?                    // checked = $4
+                    [\]\)]
+                 )
                 ([^\r]+?                        // list item text   = $3
                     (\n+)
                 )
@@ -1036,11 +1041,15 @@ else
             */
 
             var marker = _listItemMarkers[list_type];
-            var re = new RegExp("(^[ \\t]*)(" + marker + ")[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1(" + marker + ")[ \\t]+))", "gm");
+
+            //var re_str2 = /(^[ \t]*)(\d+[.])[ \t]+([^\r]+?(\n+))(?=(~0|\1(\d+[.])[ \t]+))/;
+
+            var re_str = "(^[ \\t]*)(" + marker + ")[ \\t]+([\\[\\(](x|X| )?[\\]\\)])?[ \t]*([^\\r]+?(\\n+))(?=(~0|\\1(" + marker + ")[ \\t]+))";
+            var re = new RegExp(re_str, "gm");
             var last_item_had_a_double_newline = false;
             list_str = list_str.replace(re,
-                function (wholeMatch, m1, m2, m3) {
-                    var item = m3;
+                function (wholeMatch, m1, m2, taskbtn, checked, m5) {
+                    var item = m5;
                     var leading_space = m1;
                     var ends_with_double_newline = /\n\n$/.test(item);
                     var contains_double_newline = ends_with_double_newline || item.search(/\n{2,}/) > -1;
@@ -1055,7 +1064,40 @@ else
                         item = _RunSpanGamut(item);
                     }
                     last_item_had_a_double_newline = ends_with_double_newline;
-                    return "<li>" + item + "</li>\n";
+
+                    //
+                    //  wuyongzhi: process tasklist
+                    //
+
+                    var li_attrs = '';
+
+                    if (taskbtn && taskbtn.length >= 2) {
+                        var open_char = taskbtn.charAt(0),
+                            close_char = taskbtn.charAt(taskbtn.length - 1);
+
+                        if ( (open_char=='[' && close_char == ']' ) ||
+                             (open_char=='(' && close_char == ')' )         ) {
+                            var btn_type = 'checkbox';
+                            if (open_char == '(' && close_char == ')') {
+                                btn_type = 'radio';
+                            }
+                            checked = (checked && checked.trim() !== '');
+                            li_attrs = ' class="task-list-item" style="list-style-type: none;" ';
+                            item = item.replace(/^(\[|()(x|X| )?(]|))/m, function () {
+                                // showdown margin:0px 0.35em 0.25em -1.6em
+                                var otp = '<input type="'+btn_type+'" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"';
+                                if (checked) {
+                                    otp += ' checked';
+                                }
+                                otp += '>';
+                                return otp;
+                            });
+
+                        }
+                    }
+
+
+                    return "<li" + li_attrs + ">" + item + "</li>\n";
                 }
             );
 
